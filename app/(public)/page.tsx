@@ -19,7 +19,7 @@ export default async function HomePage() {
     <>
       <HeroExperience bookingInitial={bookingInitial} />
 
-      <section className="relative z-30 bg-background">
+      <section className="home-row-reveal relative z-10 bg-background">
         <div className="mx-auto max-w-7xl px-5 py-20 lg:px-8">
           <div className="max-w-2xl">
             <h2 className="font-display text-3xl text-navy sm:text-4xl">

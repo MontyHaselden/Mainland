@@ -15,7 +15,14 @@
   --availability-red: #b91c1c;
   --hero-object-position-desktop: 65% center;
   --hero-object-position-mobile: 85% center;
-  --hero-scroll-distance: 40vh;
+  /* Hold (longer than minimal) → standard rise → hold + fade (longer than minimal) */
+  --hero-title-hold: 80vh;
+  --hero-rise: 135vh;
+  /* Short scroll after booking lands — ROW scrolls up underneath (no long fade) */
+  --hero-booking-hold: 100vh;
+  --hero-scroll-distance: calc(
+    var(--hero-title-hold) + var(--hero-rise) + var(--hero-booking-hold)
+  );
 }
 
 @theme inline {
@@ -52,6 +59,16 @@ body {
   scroll-snap-align: start;
 }
 
+/* Home: ROW fades and lifts up in sync with hero exit (see --hero-exit-progress) */
+.home-row-reveal {
+  --row-lift: calc((1 - var(--hero-exit-progress, 0)) * 4.5rem);
+  margin-top: -32vh;
+  padding-top: 32vh;
+  opacity: var(--hero-exit-progress, 0);
+  transform: translateY(var(--row-lift));
+  will-change: opacity, transform;
+}
+
 .hero-bg-layer {
   background-size: cover;
   background-repeat: no-repeat;
@@ -67,5 +84,12 @@ body {
 @media (prefers-reduced-motion: reduce) {
   :root {
     --hero-scroll-distance: 0vh;
+  }
+
+  .home-row-reveal {
+    margin-top: 0;
+    padding-top: 0;
+    opacity: 1;
+    transform: none;
   }
 }

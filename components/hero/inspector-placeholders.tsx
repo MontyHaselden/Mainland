@@ -4,13 +4,14 @@ type InspectorPlaceholdersProps = {
   progress: number;
 };
 
+/** Positions within the right-hand animation panel (percent of panel) */
 const INSPECTORS = [
-  { id: 1, label: "Roof", startX: 72, startY: 18, endX: 68, endY: 22 },
-  { id: 2, label: "Moisture", startX: 78, startY: 55, endX: 74, endY: 52 },
-  { id: 3, label: "Exterior", startX: 58, startY: 62, endX: 62, endY: 58 },
-  { id: 4, label: "Ladder", startX: 65, startY: 40, endX: 70, endY: 38 },
-  { id: 5, label: "Notes", startX: 52, startY: 48, endX: 55, endY: 45 },
-  { id: 6, label: "Thermal", startX: 82, startY: 35, endX: 79, endY: 32 },
+  { id: 1, label: "Roof", startX: 42, startY: 22, endX: 38, endY: 26 },
+  { id: 2, label: "Moisture", startX: 68, startY: 58, endX: 64, endY: 54 },
+  { id: 3, label: "Exterior", startX: 28, startY: 65, endX: 32, endY: 60 },
+  { id: 4, label: "Ladder", startX: 52, startY: 42, endX: 56, endY: 40 },
+  { id: 5, label: "Notes", startX: 18, startY: 48, endX: 22, endY: 44 },
+  { id: 6, label: "Thermal", startX: 78, startY: 36, endX: 74, endY: 32 },
 ];
 
 export function InspectorPlaceholders({ progress }: InspectorPlaceholdersProps) {
@@ -19,13 +20,14 @@ export function InspectorPlaceholders({ progress }: InspectorPlaceholdersProps) 
 
   return (
     <div
-      className="pointer-events-none absolute inset-0 z-10 transition-opacity duration-150"
+      className="absolute inset-0 transition-opacity duration-150"
       style={{ opacity }}
-      aria-hidden
     >
       {INSPECTORS.map((inspector) => {
-        const x = inspector.startX + (inspector.endX - inspector.startX) * progress;
-        const y = inspector.startY + (inspector.endY - inspector.startY) * progress;
+        const x =
+          inspector.startX + (inspector.endX - inspector.startX) * progress;
+        const y =
+          inspector.startY + (inspector.endY - inspector.startY) * progress;
         return (
           <div
             key={inspector.id}
