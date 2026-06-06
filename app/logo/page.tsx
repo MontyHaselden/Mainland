@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
-import { LOGO_CONCEPTS, LogoLockup } from "@/components/brand/logo-concepts";
+import {
+  LOGO_CONCEPTS,
+  LOGO_FEATURED,
+  LogoLockup,
+  LogoTwinPeaks,
+} from "@/components/brand/logo-concepts";
 
 export const metadata: Metadata = {
   title: "Logo concepts",
@@ -20,8 +26,8 @@ export default function LogoConceptsPage() {
               Logo concepts
             </h1>
             <p className="mt-2 max-w-xl text-sm text-muted">
-              Eight directions for Mainland Building Inspections. Each shown on
-              light and dark, with a header lockup preview.
+              Premium directions for Mainland Building Inspections — led by the
+              Twin Peaks mark.
             </p>
           </div>
           <Link
@@ -33,6 +39,37 @@ export default function LogoConceptsPage() {
         </div>
       </header>
 
+      <section className="border-b border-border bg-navy-deep px-5 py-10 lg:px-8 lg:py-14">
+        <div className="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-2">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-accent-light">
+              Featured — premium render
+            </p>
+            <h2 className="font-display mt-2 text-3xl text-white sm:text-4xl">
+              {LOGO_FEATURED.name}
+            </h2>
+            <p className="mt-2 text-accent-light">{LOGO_FEATURED.tagline}</p>
+            <p className="mt-4 text-sm leading-relaxed text-white/75">
+              {LOGO_FEATURED.description}
+            </p>
+            <div className="mt-8 flex items-center gap-4 rounded-xl border border-white/10 bg-white/5 p-5">
+              <LogoTwinPeaks className="h-16 w-16 shrink-0" />
+              <LogoLockup Mark={LogoTwinPeaks} variant="dark" />
+            </div>
+          </div>
+          <div className="overflow-hidden rounded-2xl border border-white/10 shadow-2xl">
+            <Image
+              src={LOGO_FEATURED.renderSrc}
+              alt="Twin Peaks logo premium render"
+              width={1024}
+              height={1024}
+              className="h-auto w-full"
+              priority
+            />
+          </div>
+        </div>
+      </section>
+
       <div className="mx-auto grid max-w-6xl gap-8 px-5 py-10 lg:px-8 lg:py-14">
         {LOGO_CONCEPTS.map((concept, index) => (
           <article
@@ -42,7 +79,9 @@ export default function LogoConceptsPage() {
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-4 sm:px-6">
               <div>
                 <p className="text-xs font-semibold text-accent">
-                  Concept {index + 1}
+                  {"featured" in concept && concept.featured
+                    ? "Featured concept"
+                    : `Concept ${index + 1}`}
                 </p>
                 <h2 className="font-display text-2xl text-navy">{concept.name}</h2>
                 <p className="text-sm text-muted">{concept.tagline}</p>

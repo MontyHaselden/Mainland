@@ -5,7 +5,87 @@ type LogoProps = {
   style?: CSSProperties;
 };
 
-/** 1 — Refined monogram: lush mountain + bold M */
+/** Premium — M as twin snowy peaks with river through the valley */
+export function LogoTwinPeaks({ className = "h-16 w-16", style }: LogoProps) {
+  return (
+    <svg viewBox="0 0 80 80" fill="none" className={className} style={style} aria-hidden>
+      <defs>
+        <linearGradient id="tpGreen" x1="40" y1="14" x2="40" y2="68" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#6fd99a" />
+          <stop offset="35%" stopColor="#52b788" />
+          <stop offset="100%" stopColor="#2d6a4f" />
+        </linearGradient>
+        <linearGradient id="tpGreenDark" x1="40" y1="30" x2="40" y2="68" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#3d8f62" />
+          <stop offset="100%" stopColor="#1f4d38" />
+        </linearGradient>
+        <linearGradient id="tpSnow" x1="40" y1="12" x2="40" y2="24" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#ffffff" />
+          <stop offset="100%" stopColor="#d4eaf5" />
+        </linearGradient>
+        <linearGradient id="tpRiver" x1="40" y1="42" x2="40" y2="68" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#8ecae6" />
+          <stop offset="55%" stopColor="#5ba4c9" />
+          <stop offset="100%" stopColor="#3d8eb5" />
+        </linearGradient>
+      </defs>
+      <rect width="80" height="80" rx="18" fill="#1a2332" />
+      <path
+        d="M24 68V44L30 13L36 38L40 47L44 38L50 13L56 44V68H52V49L40 63L28 49V68H24Z"
+        fill="url(#tpGreen)"
+      />
+      <path
+        d="M36 38L40 47L44 38L42.2 35.8L40 39.2L37.8 35.8L36 38Z"
+        fill="url(#tpGreenDark)"
+        opacity="0.85"
+      />
+      <path
+        d="M28 49L40 63L52 49L50 13L44 38L40 47L36 38L30 13L28 49Z"
+        fill="url(#tpGreenDark)"
+        opacity="0.22"
+      />
+      <path
+        d="M27.5 17.5L30 13L32.5 17.5L31.2 19H28.8L27.5 17.5Z"
+        fill="url(#tpSnow)"
+      />
+      <path
+        d="M47.5 17.5L50 13L52.5 17.5L51.2 19H48.8L47.5 17.5Z"
+        fill="url(#tpSnow)"
+      />
+      <path
+        d="M27.5 16.5L30 12.5L32.5 16.5"
+        stroke="#ffffff"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        opacity="0.55"
+      />
+      <path
+        d="M47.5 16.5L50 12.5L52.5 16.5"
+        stroke="#ffffff"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        opacity="0.55"
+      />
+      <path
+        d="M40 46.5C39.4 50.5 40.6 54 39.8 57.5C39.2 60.5 40 63.5 40 66.5"
+        stroke="url(#tpRiver)"
+        strokeWidth="2.6"
+        strokeLinecap="round"
+        fill="none"
+      />
+      <path
+        d="M40 46.5C40.6 50.5 39.4 54 40.2 57.5C40.8 60.5 40 63.5 40 66.5"
+        stroke="#b8e0f0"
+        strokeWidth="0.9"
+        strokeLinecap="round"
+        fill="none"
+        opacity="0.45"
+      />
+    </svg>
+  );
+}
+
+/** Refined monogram: lush mountain behind bold M */
 export function LogoSummit({ className = "h-16 w-16", style }: LogoProps) {
   return (
     <svg viewBox="0 0 80 80" fill="none" className={className} style={style} aria-hidden>
@@ -198,7 +278,30 @@ export function LogoPrecision({ className = "h-16 w-16", style }: LogoProps) {
   );
 }
 
+export const LOGO_FEATURED = {
+  id: "twin-peaks",
+  name: "Twin Peaks",
+  tagline: "Double summit M with valley river",
+  description:
+    "The M is the mountain — snowy peaks at both apexes, lush green slopes, and a river running through the central valley. Premium, regional, unmistakably Mainland.",
+  Mark: LogoTwinPeaks,
+  renderSrc: "/logo/twin-peaks-render.png",
+  wordmark: true,
+  wide: false,
+} as const;
+
 export const LOGO_CONCEPTS = [
+  {
+    id: "twin-peaks",
+    name: "Twin Peaks",
+    tagline: "Double summit M with valley river",
+    description:
+      "The M is the mountain — snowy peaks at both apexes, lush green slopes, and a river running through the central valley. Premium, regional, unmistakably Mainland.",
+    Mark: LogoTwinPeaks,
+    wordmark: true,
+    wide: false,
+    featured: true,
+  },
   {
     id: "summit",
     name: "Summit",
