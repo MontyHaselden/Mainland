@@ -41,7 +41,7 @@ export function HeroScene({
         <div className="hero-scene-blueprint-tint absolute inset-0" />
       </div>
 
-      <div className="absolute inset-0 bg-gradient-to-r from-navy-deep/55 from-0% via-navy-deep/18 via-[32%] to-transparent to-[42%]" />
+      <div className="absolute inset-0 bg-gradient-to-r from-navy-deep/45 from-0% via-navy-deep/12 via-[32%] to-transparent to-[42%]" />
       <div className="absolute inset-0 bg-gradient-to-t from-navy-deep/25 via-transparent to-transparent md:hidden" />
     </div>
   );

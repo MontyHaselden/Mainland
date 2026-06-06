@@ -62,21 +62,21 @@ body {
 }
 
 .hero-scene-grade {
-  filter: saturate(0.62) brightness(0.68) contrast(1.06);
+  filter: saturate(0.82) brightness(0.9) contrast(1.04);
 }
 
 .hero-scene-blueprint-tint {
   background: linear-gradient(
     135deg,
-    rgba(8, 16, 28, 0.55) 0%,
-    rgba(12, 32, 58, 0.35) 50%,
-    rgba(8, 16, 28, 0.5) 100%
+    rgba(8, 16, 28, 0.22) 0%,
+    rgba(12, 32, 58, 0.12) 50%,
+    rgba(8, 16, 28, 0.18) 100%
   );
   pointer-events: none;
 }
 
 .hero-blueprint-svg {
-  opacity: 0.88;
+  opacity: 0.9;
 }
 
 .hero-drone__spin .hero-drone__arm {

@@ -19,6 +19,7 @@ export const DRONE_PATH = {
   liftEnd: 0.36,
 } as const;
 
+/** label = pill position; leader = point on building feature */
 export type BlueprintCallout = {
   id: string;
   label: string;
@@ -28,94 +29,54 @@ export type BlueprintCallout = {
   leaderY: number;
 };
 
-export type BlueprintDimension = {
-  id: string;
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
-  label: string;
-  labelX: number;
-  labelY: number;
-};
-
-export type BlueprintAngle = {
-  id: string;
-  cx: number;
-  cy: number;
-  label: string;
-  labelX: number;
-  labelY: number;
-};
-
 export const BLUEPRINT_CALLOUTS: BlueprintCallout[] = [
   {
-    id: "roof",
-    label: "Colorsteel corrugated iron roof",
-    x: 930,
-    y: 168,
-    leaderX: 820,
-    leaderY: 268,
+    id: "colorsteel",
+    label: "Colorsteel roofing",
+    x: 1055,
+    y: 165,
+    leaderX: 962,
+    leaderY: 282,
   },
   {
-    id: "cladding",
+    id: "trusses",
+    label: "Timber trusses",
+    x: 1008,
+    y: 248,
+    leaderX: 736,
+    leaderY: 302,
+  },
+  {
+    id: "weatherboard",
     label: "Weatherboard cladding",
-    x: 1040,
-    y: 468,
-    leaderX: 940,
-    leaderY: 498,
+    x: 1038,
+    y: 462,
+    leaderX: 1002,
+    leaderY: 542,
   },
   {
-    id: "garage",
-    label: "Attached garage",
-    x: 1080,
-    y: 568,
-    leaderX: 1000,
-    leaderY: 548,
-  },
-];
-
-export const BLUEPRINT_DIMENSIONS: BlueprintDimension[] = [
-  {
-    id: "front",
-    x1: 560,
-    y1: 618,
-    x2: 920,
-    y2: 618,
-    label: "11.2 m",
-    labelX: 740,
-    labelY: 598,
+    id: "double-glazing",
+    label: "Double glazing",
+    x: 728,
+    y: 672,
+    leaderX: 636,
+    leaderY: 430,
   },
   {
-    id: "depth",
-    x1: 920,
-    y1: 618,
-    x2: 980,
-    y2: 498,
-    label: "8.4 m",
-    labelX: 968,
-    labelY: 562,
+    id: "joinery",
+    label: "Aluminium joinery",
+    x: 512,
+    y: 608,
+    leaderX: 660,
+    leaderY: 466,
   },
   {
-    id: "garage",
-    x1: 920,
-    y1: 558,
-    x2: 1060,
-    y2: 558,
-    label: "6.0 m",
-    labelX: 990,
-    labelY: 542,
-  },
-];
-
-export const BLUEPRINT_ANGLES: BlueprintAngle[] = [
-  {
-    id: "pitch-main",
-    cx: 760,
-    cy: 318,
-    label: "22°",
-    labelX: 792,
-    labelY: 302,
+    id: "driveway",
+    label: "Exposed aggregate",
+    x: 408,
+    y: 862,
+    leaderX: 578,
+    leaderY: 798,
   },
 ];
 
