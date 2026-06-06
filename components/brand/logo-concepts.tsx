@@ -5,12 +5,30 @@ type LogoProps = {
   style?: CSSProperties;
 };
 
-/** 1 — Refined monogram: roof peak + bold M */
+/** 1 — Refined monogram: lush mountain + bold M */
 export function LogoSummit({ className = "h-16 w-16", style }: LogoProps) {
   return (
     <svg viewBox="0 0 80 80" fill="none" className={className} style={style} aria-hidden>
+      <defs>
+        <linearGradient id="summitMountain" x1="40" y1="10" x2="40" y2="36" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#5ec995" />
+          <stop offset="45%" stopColor="#40916c" />
+          <stop offset="100%" stopColor="#2d6a4f" />
+        </linearGradient>
+        <linearGradient id="summitSnow" x1="40" y1="11" x2="40" y2="19" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#ffffff" />
+          <stop offset="100%" stopColor="#e8f4fa" />
+        </linearGradient>
+      </defs>
       <rect width="80" height="80" rx="18" fill="#1a2332" />
-      <path d="M40 14L62 32H18L40 14Z" fill="#2d6a4f" />
+      <path
+        d="M13 36L27 21L35 15L40 11L45.5 16L53 23L67 36H13Z"
+        fill="url(#summitMountain)"
+      />
+      <path
+        d="M34.5 16.5L40 11L45.5 16.5L43.2 18.8H36.8L34.5 16.5Z"
+        fill="url(#summitSnow)"
+      />
       <path
         d="M22 66V28h8.5L40 50.5L49.5 28H58V66h-8V40.5L40 58.5L30 40.5V66h-8Z"
         fill="#fff"
@@ -184,9 +202,9 @@ export const LOGO_CONCEPTS = [
   {
     id: "summit",
     name: "Summit",
-    tagline: "Roof peak + bold M monogram",
+    tagline: "Lush mountain + bold M monogram",
     description:
-      "Evolution of the current mark. Confident, architectural, works at any size.",
+      "Canterbury peaks with snow cap and rich green slopes. Confident, regional, works at any size.",
     Mark: LogoSummit,
     wordmark: true,
     wide: false,
