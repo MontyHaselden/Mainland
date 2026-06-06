@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { loginStaff } from "@/lib/auth/staff";
-import { setStaffSessionCookie } from "@/lib/auth/session";
+import {
+  COOKIE_NAME,
+  isStaffSessionSecretConfigured,
+  staffSessionCookieOptions,
+} from "@/lib/auth/session";
 
 const bodySchema = z.object({
   email: z.string().email(),
@@ -16,13 +20,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 400 });
     }
 
+    if (!isStaffSessionSecretConfigured()) {
+      console.error("Staff login error: STAFF_SESSION_SECRET is missing or too short");
+      return NextResponse.json({ error: "Login failed" }, { status: 500 });
+    }
+
     const token = await loginStaff(parsed.data.email, parsed.data.password);
     if (!token) {
       return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
     }
 
-    await setStaffSessionCookie(token);
-    return NextResponse.json({ ok: true });
+    const response = NextResponse.json({ ok: true });
+    response.cookies.set(COOKIE_NAME, token, staffSessionCookieOptions());
+    return response;
   } catch (error) {
     console.error("Staff login error:", error);
     return NextResponse.json({ error: "Login failed" }, { status: 500 });

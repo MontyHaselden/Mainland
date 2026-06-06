@@ -75,10 +75,6 @@ body {
   pointer-events: none;
 }
 
-.hero-blueprint-svg {
-  opacity: 0.9;
-}
-
 .hero-drone__spin .hero-drone__arm {
   animation: hero-drone-arm 0.12s linear infinite;
   transform-origin: 18px 18px;

@@ -1,8 +1,18 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 
-const COOKIE_NAME = "mainland_staff_session";
+export const COOKIE_NAME = "mainland_staff_session";
 const SESSION_DURATION = "7d";
+
+export function staffSessionCookieOptions() {
+  return {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax" as const,
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7,
+  };
+}
 
 export type StaffSession = {
   email: string;
@@ -45,13 +55,7 @@ export async function getStaffSession(): Promise<StaffSession | null> {
 
 export async function setStaffSessionCookie(token: string) {
   const cookieStore = await cookies();
-  cookieStore.set(COOKIE_NAME, token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 7,
-  });
+  cookieStore.set(COOKIE_NAME, token, staffSessionCookieOptions());
 }
 
 export async function clearStaffSessionCookie() {
@@ -59,4 +63,7 @@ export async function clearStaffSessionCookie() {
   cookieStore.delete(COOKIE_NAME);
 }
 
-export { COOKIE_NAME };
+export function isStaffSessionSecretConfigured() {
+  const secret = process.env.STAFF_SESSION_SECRET;
+  return Boolean(secret && secret.length >= 32);
+}

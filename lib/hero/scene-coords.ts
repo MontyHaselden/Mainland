@@ -19,67 +19,6 @@ export const DRONE_PATH = {
   liftEnd: 0.36,
 } as const;
 
-/** label = pill position; leader = point on building feature */
-export type BlueprintCallout = {
-  id: string;
-  label: string;
-  x: number;
-  y: number;
-  leaderX: number;
-  leaderY: number;
-};
-
-export const BLUEPRINT_CALLOUTS: BlueprintCallout[] = [
-  {
-    id: "colorsteel",
-    label: "Colorsteel roofing",
-    x: 1055,
-    y: 165,
-    leaderX: 962,
-    leaderY: 282,
-  },
-  {
-    id: "trusses",
-    label: "Timber trusses",
-    x: 1008,
-    y: 248,
-    leaderX: 736,
-    leaderY: 302,
-  },
-  {
-    id: "weatherboard",
-    label: "Weatherboard cladding",
-    x: 1038,
-    y: 462,
-    leaderX: 1002,
-    leaderY: 542,
-  },
-  {
-    id: "double-glazing",
-    label: "Double glazing",
-    x: 728,
-    y: 672,
-    leaderX: 636,
-    leaderY: 430,
-  },
-  {
-    id: "joinery",
-    label: "Aluminium joinery",
-    x: 512,
-    y: 608,
-    leaderX: 660,
-    leaderY: 466,
-  },
-  {
-    id: "driveway",
-    label: "Exposed aggregate",
-    x: 408,
-    y: 862,
-    leaderX: 578,
-    leaderY: 798,
-  },
-];
-
 export function lerpPoint(a: ScenePoint, b: ScenePoint, t: number): ScenePoint {
   return {
     x: a.x + (b.x - a.x) * t,

@@ -1,7 +1,5 @@
 "use client";
 
-import { HeroBlueprintOverlay } from "./hero-blueprint-overlay";
-
 type HeroImageStackProps = {
   startSrc: string;
   endSrc: string;
@@ -42,7 +40,6 @@ export function HeroImageStack({
         height={1024}
         style={{ opacity: endOpacity }}
       />
-      <HeroBlueprintOverlay />
       {children}
     </div>
   );
