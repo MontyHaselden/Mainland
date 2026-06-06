@@ -13,7 +13,7 @@ export function HeroAnimationPanel({
 }: HeroAnimationPanelProps) {
   return (
     <div
-      className="pointer-events-none fixed inset-y-0 right-0 z-[5] w-[48%] sm:w-[52%] md:w-[55%] lg:w-[58%]"
+      className="pointer-events-none absolute inset-y-0 right-0 z-[15] w-[48%] sm:w-[52%] md:w-[55%] lg:w-[58%]"
       style={{
         opacity,
         pointerEvents: opacity < 0.05 ? "none" : "auto",

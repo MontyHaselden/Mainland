@@ -13,16 +13,12 @@
   --availability-green: #2d6a4f;
   --availability-orange: #d97706;
   --availability-red: #b91c1c;
-  --hero-object-position-desktop: 65% center;
-  --hero-object-position-mobile: 85% center;
-  /* Hold (longer than minimal) → standard rise → hold + fade (longer than minimal) */
+  --hero-object-position-desktop: 58% 42%;
+  --hero-object-position-mobile: 78% 40%;
+  /* Title hold → booking rise, then natural scroll */
   --hero-title-hold: 80vh;
   --hero-rise: 135vh;
-  /* Short scroll after booking lands — ROW scrolls up underneath (no long fade) */
-  --hero-booking-hold: 100vh;
-  --hero-scroll-distance: calc(
-    var(--hero-title-hold) + var(--hero-rise) + var(--hero-booking-hold)
-  );
+  --hero-scroll-distance: calc(var(--hero-title-hold) + var(--hero-rise));
 }
 
 @theme inline {
@@ -51,33 +47,98 @@ body {
 
 .hero-pin-section {
   height: calc(100vh + var(--hero-scroll-distance));
-  scroll-snap-type: y proximity;
 }
 
 .hero-scroll-track {
   height: var(--hero-scroll-distance);
-  scroll-snap-align: start;
 }
 
-/* Home: ROW fades and lifts up in sync with hero exit (see --hero-exit-progress) */
-.home-row-reveal {
-  --row-lift: calc((1 - var(--hero-exit-progress, 0)) * 4.5rem);
-  margin-top: -32vh;
-  padding-top: 32vh;
-  opacity: var(--hero-exit-progress, 0);
-  transform: translateY(var(--row-lift));
-  will-change: opacity, transform;
+.hero-scene-frame {
+  isolation: isolate;
 }
 
-.hero-bg-layer {
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: var(--hero-object-position-mobile);
+.hero-scene-img {
+  object-position: var(--hero-object-position-mobile);
+}
+
+.hero-scene-grade {
+  filter: saturate(0.62) brightness(0.68) contrast(1.06);
+}
+
+.hero-scene-blueprint-tint {
+  background: linear-gradient(
+    135deg,
+    rgba(8, 16, 28, 0.55) 0%,
+    rgba(12, 32, 58, 0.35) 50%,
+    rgba(8, 16, 28, 0.5) 100%
+  );
+  pointer-events: none;
+}
+
+.hero-blueprint-svg {
+  opacity: 0.88;
+}
+
+.hero-drone__spin .hero-drone__arm {
+  animation: hero-drone-arm 0.12s linear infinite;
+  transform-origin: 18px 18px;
+}
+
+.hero-drone__spin .hero-drone__arm--b {
+  animation-delay: -0.03s;
+}
+
+.hero-drone__spin .hero-drone__arm--c {
+  animation-delay: -0.06s;
+}
+
+.hero-drone__spin .hero-drone__arm--d {
+  animation-delay: -0.09s;
+}
+
+.hero-drone__ring {
+  width: 52px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse,
+    rgba(96, 196, 255, 0.22) 0%,
+    transparent 70%
+  );
+  animation: hero-drone-shadow 1.8s ease-in-out infinite;
+}
+
+@keyframes hero-drone-arm {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes hero-drone-shadow {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  50% {
+    opacity: 0.85;
+    transform: translate(-50%, -50%) scale(1.05);
+  }
 }
 
 @media (min-width: 768px) {
-  .hero-bg-layer {
-    background-position: var(--hero-object-position-desktop);
+  .hero-scene-img {
+    object-position: var(--hero-object-position-desktop);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-drone__spin .hero-drone__arm,
+  .hero-drone__ring {
+    animation: none;
   }
 }
 
@@ -86,10 +147,17 @@ body {
     --hero-scroll-distance: 0vh;
   }
 
-  .home-row-reveal {
-    margin-top: 0;
-    padding-top: 0;
-    opacity: 1;
-    transform: none;
-  }
+}
+
+/* Present in HTML for crawlers; not shown to sighted users */
+.seo-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

@@ -9,7 +9,10 @@
     "lint": "eslint",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "staff:hash": "node scripts/staff-hash-password.mjs",
+    "staff:seed": "node --env-file=.env.local scripts/staff-seed.mjs",
+    "staff:add": "node --env-file=.env.local scripts/staff-add.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

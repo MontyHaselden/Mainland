@@ -1,7 +1,36 @@
 import bcrypt from "bcryptjs";
+import { eq } from "drizzle-orm";
+import { getDb } from "@/lib/db";
+import { staffUsers } from "@/lib/db/schema";
 import { createStaffSession, getStaffSession } from "./session";
 
-export async function validateStaffCredentials(
+async function validateDatabaseStaff(
+  email: string,
+  password: string
+): Promise<boolean> {
+  if (!process.env.DATABASE_URL) {
+    return false;
+  }
+
+  try {
+    const db = getDb();
+    const [user] = await db
+      .select()
+      .from(staffUsers)
+      .where(eq(staffUsers.email, email.toLowerCase()))
+      .limit(1);
+
+    if (!user) {
+      return false;
+    }
+
+    return bcrypt.compare(password, user.passwordHash);
+  } catch {
+    return false;
+  }
+}
+
+async function validateEnvStaff(
   email: string,
   password: string
 ): Promise<boolean> {
@@ -22,6 +51,17 @@ export async function validateStaffCredentials(
   }
 
   return false;
+}
+
+export async function validateStaffCredentials(
+  email: string,
+  password: string
+): Promise<boolean> {
+  if (await validateDatabaseStaff(email, password)) {
+    return true;
+  }
+
+  return validateEnvStaff(email, password);
 }
 
 export async function loginStaff(email: string, password: string) {

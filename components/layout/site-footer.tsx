@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { SeoLocationLinks } from "@/components/seo/seo-location-links";
 
 export function SiteFooter() {
   return (
     <footer className="border-t border-border bg-navy-deep text-white">
+      <SeoLocationLinks />
       <div className="mx-auto grid max-w-7xl gap-10 px-5 py-14 lg:grid-cols-3 lg:px-8">
         <div>
           <p className="font-display text-xl">Mainland Building Inspections</p>

@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { BookingWizard } from "@/components/booking/booking-wizard";
 import type { MonthAvailabilityResponse } from "@/lib/booking/types";
-import { HeroAnimationPanel } from "./hero-animation-panel";
 import { HeroBackground } from "./hero-background";
 
 type HeroExperienceProps = {
@@ -17,9 +16,7 @@ function easeScrollProgress(progress: number): number {
 /** Sync with globals.css */
 const HERO_TITLE_HOLD_VH = 80;
 const HERO_RISE_VH = 135;
-const HERO_BOOKING_HOLD_VH = 100;
-const HERO_TOTAL_VH =
-  HERO_TITLE_HOLD_VH + HERO_RISE_VH + HERO_BOOKING_HOLD_VH;
+const HERO_TOTAL_VH = HERO_TITLE_HOLD_VH + HERO_RISE_VH;
 const TITLE_HOLD_END = HERO_TITLE_HOLD_VH / HERO_TOTAL_VH;
 const BOOKING_RISE_END =
   (HERO_TITLE_HOLD_VH + HERO_RISE_VH) / HERO_TOTAL_VH;
@@ -50,26 +47,29 @@ export function HeroExperience({ bookingInitial }: HeroExperienceProps) {
     setBookingStartPx(vh * 0.5 + cardH * 0.55);
   }, []);
 
-  useLayoutEffect(() => {
-    measureLayout();
-    window.addEventListener("resize", measureLayout);
-    return () => window.removeEventListener("resize", measureLayout);
-  }, [measureLayout]);
-
   const updateScroll = useCallback(() => {
     const el = pinRef.current;
     if (!el) return;
 
     const rect = el.getBoundingClientRect();
     const pinHeight = el.offsetHeight - window.innerHeight;
-    if (pinHeight <= 0) return;
+    if (pinHeight <= 0) {
+      setScrollProgress(0);
+      return;
+    }
 
     const scrolled = Math.min(Math.max(-rect.top, 0), pinHeight);
     setScrollProgress(scrolled / pinHeight);
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    measureLayout();
     updateScroll();
+    window.addEventListener("resize", measureLayout);
+    return () => window.removeEventListener("resize", measureLayout);
+  }, [measureLayout, updateScroll]);
+
+  useEffect(() => {
     window.addEventListener("scroll", updateScroll, { passive: true });
     window.addEventListener("resize", updateScroll);
     return () => {
@@ -78,66 +78,38 @@ export function HeroExperience({ bookingInitial }: HeroExperienceProps) {
     };
   }, [updateScroll]);
 
+  const inTitleHold = scrollProgress <= TITLE_HOLD_END;
+  const riseSpan = BOOKING_RISE_END - TITLE_HOLD_END;
   const riseRaw =
-    scrollProgress <= TITLE_HOLD_END
+    inTitleHold || riseSpan <= 0
       ? 0
-      : Math.min(
-          1,
-          (scrollProgress - TITLE_HOLD_END) /
-            (BOOKING_RISE_END - TITLE_HOLD_END)
-        );
-  const eased = easeScrollProgress(scrollProgress);
+      : Math.min(1, (scrollProgress - TITLE_HOLD_END) / riseSpan);
   const bookingRise = easeScrollProgress(riseRaw);
-  const riseAmount = riseRaw >= 1 ? 1 : Math.min(1, bookingRise * 2.5);
+  const riseAmount = riseRaw >= 1 ? 1 : bookingRise;
 
-  const titleShiftPx = riseAmount * titleExitPx;
+  const titleShiftPx = easeScrollProgress(riseRaw) * titleExitPx;
   const bookingOffsetPx = bookingStartPx * (1 - riseAmount);
-  const bookingVisible = scrollProgress >= TITLE_HOLD_END * 0.98;
-  const titleHidden = riseAmount >= 0.98;
-  const holdRaw =
-    scrollProgress <= BOOKING_RISE_END
-      ? 0
-      : Math.min(
-          1,
-          (scrollProgress - BOOKING_RISE_END) / (1 - BOOKING_RISE_END)
-        );
-  const exitAmount = easeScrollProgress(holdRaw);
-  const heroOpacity = 1 - exitAmount;
-
-  const bookingInteractive =
-    riseAmount > 0.7 && exitAmount < 0.35 && bookingVisible;
-
-  useEffect(() => {
-    document.documentElement.style.setProperty(
-      "--hero-exit-progress",
-      String(exitAmount)
-    );
-    return () => {
-      document.documentElement.style.removeProperty("--hero-exit-progress");
-    };
-  }, [exitAmount]);
+  const bookingVisible = scrollProgress >= TITLE_HOLD_END * 0.92;
+  const titleHidden = !inTitleHold && riseRaw >= 0.96;
+  const showBooking = bookingVisible;
+  const bookingInteractive = riseAmount > 0.7 && showBooking;
 
   return (
-    <div ref={pinRef} className="hero-pin-section relative z-40">
-      <HeroBackground opacity={heroOpacity} />
-      <HeroAnimationPanel
-        progress={Math.min(1, eased * 1.1)}
-        opacity={heroOpacity}
-      />
+    <div ref={pinRef} className="hero-pin-section relative isolate z-40">
+      <section className="sticky top-0 z-10 h-screen w-full overflow-visible">
+        <HeroBackground scrollProgress={scrollProgress} riseRaw={riseRaw} />
 
-      <section className="sticky top-0 h-screen w-full overflow-hidden">
         <div className="relative z-20 mx-auto flex h-full w-full max-w-7xl">
           <div
             ref={stageRef}
-            className="relative flex h-full w-full min-w-0 flex-col justify-center overflow-hidden px-5 pt-20 pb-8 md:max-w-[46%] md:flex-[0_0_46%] md:px-8 md:pt-24 lg:flex-[0_0_42%]"
+            className="relative flex h-full w-full min-w-0 flex-col justify-center overflow-visible px-5 pt-20 pb-8 md:max-w-[46%] md:flex-[0_0_46%] md:px-8 md:pt-24 lg:flex-[0_0_42%]"
           >
             <div
               ref={titleRef}
-              className="relative z-0 shrink-0 will-change-transform"
+              className="relative z-30 shrink-0 will-change-transform"
               style={{
                 transform: `translate3d(0, -${titleShiftPx}px, 0)`,
                 opacity: titleHidden ? 0 : 1,
-                visibility: titleHidden ? "hidden" : "visible",
               }}
             >
               <p className="text-sm font-semibold uppercase tracking-widest text-white/80">
@@ -156,31 +128,25 @@ export function HeroExperience({ bookingInitial }: HeroExperienceProps) {
           <div className="hidden min-w-0 flex-1 md:block" aria-hidden />
         </div>
 
-        <div className="pointer-events-none fixed inset-0 z-[35]">
+        <div className="pointer-events-none absolute inset-0 z-[35]">
           <div className="relative mx-auto h-full w-full max-w-7xl">
             <div
               ref={bookingRef}
               className="pointer-events-auto absolute left-5 top-1/2 w-[calc(100%-2.5rem)] max-w-md will-change-transform md:left-8"
               style={{
                 transform: `translate3d(0, calc(-50% + ${bookingOffsetPx}px), 0)`,
-                opacity: bookingVisible ? heroOpacity : 0,
+                opacity: showBooking ? 1 : 0,
                 pointerEvents: bookingInteractive ? "auto" : "none",
               }}
             >
-                <BookingWizard
-                  embedded
-                  initialMonth={bookingInitial?.month}
-                  initialDays={bookingInitial?.days}
-                />
-              </div>
+              <BookingWizard
+                embedded
+                initialMonth={bookingInitial?.month}
+                initialDays={bookingInitial?.days}
+              />
             </div>
           </div>
-
-        {scrollProgress < TITLE_HOLD_END + 0.02 && (
-          <div className="pointer-events-none absolute bottom-8 left-1/2 z-30 -translate-x-1/2 text-center text-xs text-white/60 md:left-[21%] md:translate-x-0">
-            Scroll to book
-          </div>
-        )}
+        </div>
       </section>
 
       <div className="hero-scroll-track" aria-hidden />
