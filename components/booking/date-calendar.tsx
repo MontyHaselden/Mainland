@@ -48,8 +48,8 @@ export function DateCalendar({
   ];
 
   return (
-    <div>
-      <div className="mb-4 flex items-center justify-between">
+    <div className="flex h-full flex-col">
+      <div className="mb-3 flex shrink-0 items-center justify-between">
         <Button type="button" variant="ghost" onClick={prevMonth}>
           ←
         </Button>
@@ -59,26 +59,40 @@ export function DateCalendar({
         </Button>
       </div>
 
-      <div className="mb-2 grid grid-cols-7 gap-1 text-center text-xs font-medium text-muted">
+      <div className="mb-1.5 grid shrink-0 grid-cols-7 gap-1 text-center text-xs font-medium text-muted">
         {WEEKDAYS.map((d) => (
           <span key={d}>{d}</span>
         ))}
       </div>
 
       {loading ? (
-        <p className="py-8 text-center text-sm text-muted">Loading calendar…</p>
+        <p className="flex flex-1 items-center justify-center text-sm text-muted">
+          Loading calendar…
+        </p>
       ) : (
-        <div className="grid grid-cols-7 gap-1.5">
+        <div className="grid min-h-0 flex-1 grid-cols-7 gap-1.5 content-start">
           {cells.map((day, i) => {
             if (!day) {
               return <div key={`empty-${i}`} />;
             }
-            const bookable =
-              isBookableWeekday(day.date) &&
-              !isPastDate(day.date) &&
-              day.status !== "red";
+            const showAvailability =
+              isBookableWeekday(day.date) && !isPastDate(day.date);
+            const bookable = showAvailability && day.status !== "red";
             const colors = AVAILABILITY_COLORS[day.status];
             const dayNum = format(parseISO(day.date), "d");
+
+            let cellClass =
+              "flex min-h-11 items-center justify-center rounded-lg text-sm font-semibold transition-all ";
+            if (showAvailability) {
+              cellClass += `${colors.bg} text-white `;
+              cellClass += bookable
+                ? "hover:brightness-110 hover:ring-2 hover:ring-white/40"
+                : "cursor-not-allowed opacity-85";
+            } else if (isPastDate(day.date)) {
+              cellClass += "cursor-default bg-border/50 text-muted/50";
+            } else {
+              cellClass += "cursor-default text-muted/35";
+            }
 
             return (
               <button
@@ -86,37 +100,27 @@ export function DateCalendar({
                 type="button"
                 disabled={!bookable}
                 onClick={() => bookable && onSelectDate(day.date)}
-                title={bookable ? colors.label : "Unavailable"}
-                className={`flex min-h-11 flex-col items-center justify-center rounded-lg text-sm font-medium transition-colors ${
-                  bookable
-                    ? "bg-background text-navy hover:ring-2 hover:ring-accent/40"
-                    : "cursor-not-allowed text-muted/40"
-                }`}
+                title={showAvailability ? colors.label : "Unavailable"}
+                className={cellClass}
               >
-                <span>{dayNum}</span>
-                {isBookableWeekday(day.date) && !isPastDate(day.date) && (
-                  <span
-                    className={`mt-1 h-2 w-2 rounded-full ${colors.bg}`}
-                    aria-hidden
-                  />
-                )}
+                {dayNum}
               </button>
             );
           })}
         </div>
       )}
 
-      <ul className="mt-4 flex flex-wrap gap-4 text-xs text-muted">
+      <ul className="mt-3 flex shrink-0 flex-wrap gap-4 text-xs text-muted">
         <li className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-[var(--availability-green)]" />
+          <span className="h-4 w-4 rounded-md bg-[var(--availability-green)]" />
           2 slots
         </li>
         <li className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-[var(--availability-orange)]" />
+          <span className="h-4 w-4 rounded-md bg-[var(--availability-orange)]" />
           1 slot
         </li>
         <li className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-[var(--availability-red)]" />
+          <span className="h-4 w-4 rounded-md bg-[var(--availability-red)]" />
           Full
         </li>
       </ul>

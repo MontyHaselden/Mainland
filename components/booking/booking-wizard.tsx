@@ -21,6 +21,9 @@ import { ConfirmStep } from "./confirm-step";
 
 type Step = "date" | "slot" | "details" | "confirm" | "success";
 
+/** Fixed body height — all steps match the calendar step */
+export const BOOKING_STEP_BODY_CLASS = "h-[24.5rem]";
+
 function getNzMonth(): string {
   return format(toZonedTime(new Date(), NZ_TIMEZONE), "yyyy-MM");
 }
@@ -30,6 +33,34 @@ type BookingWizardProps = {
   initialMonth?: string;
   initialDays?: DayAvailability[];
 };
+
+function WizardHeader({
+  showBack,
+  onBack,
+}: {
+  showBack: boolean;
+  onBack: () => void;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <h2 className="font-display text-xl text-navy sm:text-2xl">
+        Book an inspection
+      </h2>
+      {showBack ? (
+        <Button
+          type="button"
+          variant="ghost"
+          className="min-h-10 shrink-0 px-3 text-sm"
+          onClick={onBack}
+        >
+          ← Back
+        </Button>
+      ) : (
+        <span className="w-[4.5rem] shrink-0" aria-hidden />
+      )}
+    </div>
+  );
+}
 
 export function BookingWizard({
   embedded = false,
@@ -76,6 +107,12 @@ export function BookingWizard({
     void loadMonth(m);
   }
 
+  function handleBack() {
+    if (step === "slot") setStep("date");
+    else if (step === "details") setStep("slot");
+    else if (step === "confirm") setStep("details");
+  }
+
   const selectedDay = availability.find((d) => d.date === selectedDate);
 
   async function handleSubmit() {
@@ -112,9 +149,13 @@ export function BookingWizard({
     }
   }
 
+  const cardClass = embedded
+    ? "w-full border-white/20 bg-surface shadow-2xl shadow-navy/15 backdrop-blur-none"
+    : "mx-auto w-full max-w-2xl";
+
   if (step === "success") {
     return (
-      <Card className={embedded ? "" : "mx-auto max-w-lg"}>
+      <Card className={cardClass}>
         <h2 className="font-display text-2xl text-navy">You&apos;re booked</h2>
         <p className="mt-2 text-muted">
           Your inspection is confirmed. A confirmation email has been sent to{" "}
@@ -128,38 +169,33 @@ export function BookingWizard({
   }
 
   return (
-    <Card className={embedded ? "" : "mx-auto max-w-lg"}>
-      <div className="mb-6 flex items-center justify-between gap-2">
-        <h2 className="font-display text-xl text-navy sm:text-2xl">
-          Book an inspection
-        </h2>
-        <StepIndicator step={step} />
-      </div>
+    <Card className={cardClass}>
+      <WizardHeader showBack={step !== "date"} onBack={handleBack} />
 
       {error && (
-        <p className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">
+        <p className="mt-3 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">
           {error}
         </p>
       )}
 
-      {step === "date" && availability.length === 0 && !loadingMonth && (
-        <div className="mb-4">
-          <Button
-            type="button"
-            variant="secondary"
-            className="w-full"
-            onClick={() => {
-              setLoadingMonth(true);
-              void loadMonth(month);
-            }}
-          >
-            Load availability
-          </Button>
-        </div>
-      )}
+      <div className={`mt-4 w-full ${BOOKING_STEP_BODY_CLASS}`}>
+        {step === "date" && availability.length === 0 && !loadingMonth && (
+          <div className="flex h-full items-center justify-center">
+            <Button
+              type="button"
+              variant="secondary"
+              className="w-full max-w-xs"
+              onClick={() => {
+                setLoadingMonth(true);
+                void loadMonth(month);
+              }}
+            >
+              Load availability
+            </Button>
+          </div>
+        )}
 
-      {step === "date" && (
-        <>
+        {step === "date" && (availability.length > 0 || loadingMonth) && (
           <DateCalendar
             month={month}
             days={availability}
@@ -172,18 +208,9 @@ export function BookingWizard({
               setStep("slot");
             }}
           />
-        </>
-      )}
+        )}
 
-      {step === "slot" && selectedDay && (
-        <>
-          <button
-            type="button"
-            className="mb-4 text-sm text-accent hover:underline"
-            onClick={() => setStep("date")}
-          >
-            ← Change date
-          </button>
+        {step === "slot" && selectedDay && (
           <SlotPicker
             day={selectedDay}
             selectedSlot={selectedSlot}
@@ -192,47 +219,26 @@ export function BookingWizard({
               setStep("details");
             }}
           />
-        </>
-      )}
+        )}
 
-      {step === "details" && (
-        <>
-          <button
-            type="button"
-            className="mb-4 text-sm text-accent hover:underline"
-            onClick={() => setStep("slot")}
-          >
-            ← Change slot
-          </button>
+        {step === "details" && (
           <CustomerForm
             values={form}
             onChange={setForm}
             onContinue={() => setStep("confirm")}
           />
-        </>
-      )}
+        )}
 
-      {step === "confirm" && selectedDate && selectedSlot && (
-        <ConfirmStep
-          date={selectedDate}
-          slot={selectedSlot}
-          form={form}
-          onBack={() => setStep("details")}
-          onConfirm={handleSubmit}
-          submitting={submitting}
-        />
-      )}
+        {step === "confirm" && selectedDate && selectedSlot && (
+          <ConfirmStep
+            date={selectedDate}
+            slot={selectedSlot}
+            form={form}
+            onConfirm={handleSubmit}
+            submitting={submitting}
+          />
+        )}
+      </div>
     </Card>
-  );
-}
-
-function StepIndicator({ step }: { step: Step }) {
-  const steps: Step[] = ["date", "slot", "details", "confirm"];
-  const idx = steps.indexOf(step);
-  if (idx < 0) return null;
-  return (
-    <span className="text-xs font-medium text-muted">
-      {idx + 1} / {steps.length}
-    </span>
   );
 }

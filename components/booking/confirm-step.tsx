@@ -15,72 +15,88 @@ type ConfirmStepProps = {
     notes: string;
     agentName: string;
   };
-  onBack: () => void;
   onConfirm: () => void;
   submitting: boolean;
 };
+
+function SummaryField({
+  label,
+  value,
+  className = "",
+}: {
+  label: string;
+  value: string;
+  className?: string;
+}) {
+  return (
+    <div
+      className={`rounded-lg border border-border/80 bg-background/80 px-3.5 py-2.5 ${className}`}
+    >
+      <p className="text-[0.65rem] font-bold uppercase tracking-wider text-muted">
+        {label}
+      </p>
+      <p className="mt-0.5 text-sm font-medium leading-snug text-navy">{value}</p>
+    </div>
+  );
+}
 
 export function ConfirmStep({
   date,
   slot,
   form,
-  onBack,
   onConfirm,
   submitting,
 }: ConfirmStepProps) {
   const dateLabel = format(parseISO(date), "EEEE, d MMMM yyyy");
 
   return (
-    <div>
-      <dl className="space-y-3 text-sm">
-        <div>
-          <dt className="font-semibold text-navy">Date</dt>
-          <dd className="text-muted">{dateLabel}</dd>
-        </div>
-        <div>
-          <dt className="font-semibold text-navy">Slot</dt>
-          <dd className="text-muted">{SLOT_LABELS[slot]}</dd>
-        </div>
-        <div>
-          <dt className="font-semibold text-navy">Name</dt>
-          <dd className="text-muted">{form.customerName}</dd>
-        </div>
-        <div>
-          <dt className="font-semibold text-navy">Contact</dt>
-          <dd className="text-muted">
-            {form.customerEmail} · {form.customerPhone}
-          </dd>
-        </div>
-        <div>
-          <dt className="font-semibold text-navy">Property</dt>
-          <dd className="text-muted">{form.propertyAddress}</dd>
-        </div>
-        {form.agentName && (
-          <div>
-            <dt className="font-semibold text-navy">Agent</dt>
-            <dd className="text-muted">{form.agentName}</dd>
-          </div>
-        )}
-        {form.notes && (
-          <div>
-            <dt className="font-semibold text-navy">Notes</dt>
-            <dd className="text-muted">{form.notes}</dd>
-          </div>
-        )}
-      </dl>
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-        <Button type="button" variant="secondary" onClick={onBack}>
-          Back
-        </Button>
-        <Button
-          type="button"
-          className="flex-1"
-          onClick={onConfirm}
-          disabled={submitting}
-        >
-          {submitting ? "Confirming…" : "Confirm booking"}
-        </Button>
+    <div className="flex h-full min-h-0 flex-col">
+      <p className="mb-3 shrink-0 text-sm text-muted">
+        Check everything looks right, then confirm your booking.
+      </p>
+
+      <div className="mb-3 shrink-0 rounded-xl border border-accent/20 bg-accent/5 px-4 py-3">
+        <p className="text-[0.65rem] font-bold uppercase tracking-wider text-accent">
+          Inspection
+        </p>
+        <p className="font-display mt-1 text-lg leading-tight text-navy">
+          {dateLabel}
+        </p>
+        <p className="mt-1 text-sm font-medium text-muted">
+          {SLOT_LABELS[slot]} slot
+        </p>
       </div>
+
+      <div className="min-h-0 flex-1 overflow-y-auto pr-0.5">
+        <p className="mb-2 text-[0.65rem] font-bold uppercase tracking-wider text-muted">
+          Your details
+        </p>
+        <div className="grid gap-2 sm:grid-cols-2">
+          <SummaryField label="Name" value={form.customerName} />
+          <SummaryField label="Property" value={form.propertyAddress} />
+          <SummaryField label="Email" value={form.customerEmail} />
+          <SummaryField label="Phone" value={form.customerPhone} />
+          {form.agentName && (
+            <SummaryField label="Agent" value={form.agentName} />
+          )}
+          {form.notes && (
+            <SummaryField
+              label="Notes"
+              value={form.notes}
+              className={form.agentName ? "sm:col-span-2" : "sm:col-span-2"}
+            />
+          )}
+        </div>
+      </div>
+
+      <Button
+        type="button"
+        className="mt-4 w-full shrink-0"
+        onClick={onConfirm}
+        disabled={submitting}
+      >
+        {submitting ? "Confirming…" : "Confirm booking"}
+      </Button>
     </div>
   );
 }

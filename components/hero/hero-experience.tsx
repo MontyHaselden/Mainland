@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { BookingWizard } from "@/components/booking/booking-wizard";
 import type { MonthAvailabilityResponse } from "@/lib/booking/types";
 import { HeroBackground } from "./hero-background";
@@ -9,43 +9,47 @@ type HeroExperienceProps = {
   bookingInitial: MonthAvailabilityResponse | null;
 };
 
-function easeScrollProgress(progress: number): number {
-  return progress * progress * (3 - 2 * progress);
+function easeInOutCubic(progress: number): number {
+  return progress < 0.5
+    ? 4 * progress * progress * progress
+    : 1 - Math.pow(-2 * progress + 2, 3) / 2;
 }
 
-/** Sync with globals.css */
-const HERO_TITLE_HOLD_VH = 80;
-const HERO_RISE_VH = 135;
-const HERO_TOTAL_VH = HERO_TITLE_HOLD_VH + HERO_RISE_VH;
-const TITLE_HOLD_END = HERO_TITLE_HOLD_VH / HERO_TOTAL_VH;
-const BOOKING_RISE_END =
-  (HERO_TITLE_HOLD_VH + HERO_RISE_VH) / HERO_TOTAL_VH;
+/**
+ * Pinned scroll phases (shares of 0→1 through the pin track):
+ * 1. Title hold — title frozen at rest
+ * 2. Animate — title exits up, booking rises in
+ * 3. Booking hold — booking locked on hero before exit scroll
+ */
+const TITLE_HOLD_END = 0.3;
+const ANIM_END = 0.72;
+
+/** Shared travel factor — title and booking move in the same lane */
+const SLOT_TRAVEL = "(50vh + 16rem)";
+
+function transitionFromScroll(scrollProgress: number): number {
+  if (scrollProgress <= TITLE_HOLD_END) return 0;
+  if (scrollProgress >= ANIM_END) return 1;
+  const raw =
+    (scrollProgress - TITLE_HOLD_END) / (ANIM_END - TITLE_HOLD_END);
+  return easeInOutCubic(raw);
+}
+
+function bookingOpacityFromTransition(transition: number): number {
+  if (transition <= 0) return 0;
+  if (transition >= 0.2) return 1;
+  return transition / 0.2;
+}
+
+function titleOpacityFromTransition(transition: number): number {
+  if (transition <= 0.75) return 1;
+  if (transition >= 1) return 0;
+  return 1 - (transition - 0.75) / 0.25;
+}
 
 export function HeroExperience({ bookingInitial }: HeroExperienceProps) {
   const pinRef = useRef<HTMLDivElement>(null);
-  const stageRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLDivElement>(null);
-  const bookingRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [titleExitPx, setTitleExitPx] = useState(480);
-  const [bookingStartPx, setBookingStartPx] = useState(640);
-
-  const measureLayout = useCallback(() => {
-    const stage = stageRef.current;
-    const title = titleRef.current;
-    const booking = bookingRef.current;
-    const vh = window.innerHeight;
-    if (!stage || !title) return;
-
-    const stageRect = stage.getBoundingClientRect();
-    const titleRect = title.getBoundingClientRect();
-    const exit =
-      titleRect.top - stageRect.top + title.offsetHeight + stageRect.height * 0.08;
-    setTitleExitPx(Math.max(exit, 320));
-
-    const cardH = booking?.offsetHeight ?? 420;
-    setBookingStartPx(vh * 0.5 + cardH * 0.55);
-  }, []);
 
   const updateScroll = useCallback(() => {
     const el = pinRef.current;
@@ -62,14 +66,8 @@ export function HeroExperience({ bookingInitial }: HeroExperienceProps) {
     setScrollProgress(scrolled / pinHeight);
   }, []);
 
-  useLayoutEffect(() => {
-    measureLayout();
-    updateScroll();
-    window.addEventListener("resize", measureLayout);
-    return () => window.removeEventListener("resize", measureLayout);
-  }, [measureLayout, updateScroll]);
-
   useEffect(() => {
+    updateScroll();
     window.addEventListener("scroll", updateScroll, { passive: true });
     window.addEventListener("resize", updateScroll);
     return () => {
@@ -78,78 +76,65 @@ export function HeroExperience({ bookingInitial }: HeroExperienceProps) {
     };
   }, [updateScroll]);
 
-  const inTitleHold = scrollProgress <= TITLE_HOLD_END;
-  const riseSpan = BOOKING_RISE_END - TITLE_HOLD_END;
-  const riseRaw =
-    inTitleHold || riseSpan <= 0
-      ? 0
-      : Math.min(1, (scrollProgress - TITLE_HOLD_END) / riseSpan);
-  const bookingRise = easeScrollProgress(riseRaw);
-  const riseAmount = riseRaw >= 1 ? 1 : bookingRise;
-
-  const titleShiftPx = easeScrollProgress(riseRaw) * titleExitPx;
-  const bookingOffsetPx = bookingStartPx * (1 - riseAmount);
-  const bookingVisible = scrollProgress >= TITLE_HOLD_END * 0.92;
-  const titleHidden = !inTitleHold && riseRaw >= 0.96;
-  const showBooking = bookingVisible;
-  const bookingInteractive = riseAmount > 0.7 && showBooking;
+  const transition = transitionFromScroll(scrollProgress);
+  const bookingInteractive =
+    transition >= 0.98 && scrollProgress < 1;
+  const bookingOpacity = bookingOpacityFromTransition(transition);
+  const titleOpacity = titleOpacityFromTransition(transition);
 
   return (
-    <div ref={pinRef} className="hero-pin-section relative isolate z-40">
-      <section className="sticky top-0 z-10 h-screen w-full overflow-visible">
-        <HeroBackground scrollProgress={scrollProgress} riseRaw={riseRaw} />
+    <div
+      ref={pinRef}
+      className="hero-pin-section relative isolate z-40 -mt-[var(--site-header-height)]"
+    >
+      <section className="sticky top-0 z-10 h-screen w-full overflow-hidden">
+        <HeroBackground riseRaw={0} />
 
-        <div className="relative z-20 mx-auto flex h-full w-full max-w-7xl">
-          <div
-            ref={stageRef}
-            className="relative flex h-full w-full min-w-0 flex-col justify-center overflow-visible px-5 pt-20 pb-8 md:max-w-[46%] md:flex-[0_0_46%] md:px-8 md:pt-24 lg:flex-[0_0_42%]"
-          >
-            <div
-              ref={titleRef}
-              className="relative z-30 shrink-0 will-change-transform"
-              style={{
-                transform: `translate3d(0, -${titleShiftPx}px, 0)`,
-                opacity: titleHidden ? 0 : 1,
-              }}
-            >
-              <p className="text-sm font-semibold uppercase tracking-widest text-white/80">
-                Canterbury &amp; South Island
-              </p>
-              <h1 className="font-display mt-3 text-4xl leading-tight text-white sm:text-5xl lg:text-6xl">
-                Building inspections you can trust
-              </h1>
-              <p className="mt-4 max-w-md text-base text-white/85 lg:text-lg">
-                Clear, thorough reports from licensed inspectors. Book your
-                morning or afternoon slot in minutes.
-              </p>
-            </div>
-          </div>
+        <div className="absolute inset-0 z-20 overflow-hidden">
+          <div className="mx-auto flex h-full w-full max-w-7xl items-center px-5 pt-[var(--site-header-height)] md:px-8">
+            <div className="relative w-full max-w-2xl" style={{ height: "32rem" }}>
+              {/* Title — rests in slot, floats up off the top on scroll */}
+              <div
+                className="absolute inset-0 flex items-center will-change-transform"
+                style={{
+                  transform: `translate3d(0, calc(${-transition} * ${SLOT_TRAVEL}), 0)`,
+                  opacity: titleOpacity,
+                  pointerEvents: transition < 0.15 ? "auto" : "none",
+                }}
+              >
+                <div className="hero-title-panel w-full rounded-2xl border border-white/10 bg-navy-deep/55 px-6 py-5 backdrop-blur-md sm:px-7 sm:py-6">
+                  <p className="text-sm font-semibold uppercase tracking-widest text-white/80">
+                    Canterbury &amp; South Island
+                  </p>
+                  <h1 className="font-display mt-3 text-4xl leading-tight text-white sm:text-5xl lg:text-6xl">
+                    Building inspections you can trust
+                  </h1>
+                  <p className="mt-4 max-w-md text-base text-white/90 lg:text-lg">
+                    Clear, thorough reports from licensed inspectors. Book your
+                    morning or afternoon slot in minutes.
+                  </p>
+                </div>
+              </div>
 
-          <div className="hidden min-w-0 flex-1 md:block" aria-hidden />
-        </div>
-
-        <div className="pointer-events-none absolute inset-0 z-[35]">
-          <div className="relative mx-auto h-full w-full max-w-7xl">
-            <div
-              ref={bookingRef}
-              className="pointer-events-auto absolute left-5 top-1/2 w-[calc(100%-2.5rem)] max-w-md will-change-transform md:left-8"
-              style={{
-                transform: `translate3d(0, calc(-50% + ${bookingOffsetPx}px), 0)`,
-                opacity: showBooking ? 1 : 0,
-                pointerEvents: bookingInteractive ? "auto" : "none",
-              }}
-            >
-              <BookingWizard
-                embedded
-                initialMonth={bookingInitial?.month}
-                initialDays={bookingInitial?.days}
-              />
+              {/* Booking — rises into slot in sync with title exit */}
+              <div
+                className="absolute inset-0 z-30 flex items-center will-change-transform"
+                style={{
+                  transform: `translate3d(0, calc(${(1 - transition)} * ${SLOT_TRAVEL}), 0)`,
+                  opacity: bookingOpacity,
+                  pointerEvents: bookingInteractive ? "auto" : "none",
+                }}
+              >
+                <BookingWizard
+                  embedded
+                  initialMonth={bookingInitial?.month}
+                  initialDays={bookingInitial?.days}
+                />
+              </div>
             </div>
           </div>
         </div>
       </section>
-
-      <div className="hero-scroll-track" aria-hidden />
     </div>
   );
 }

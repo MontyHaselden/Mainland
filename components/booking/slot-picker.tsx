@@ -20,9 +20,9 @@ export function SlotPicker({ day, onSelect }: SlotPickerProps) {
   const dateLabel = format(parseISO(day.date), "EEEE, d MMMM yyyy");
 
   return (
-    <div>
-      <p className="mb-4 text-sm text-muted">{dateLabel}</p>
-      <div className="grid gap-3 sm:grid-cols-2">
+    <div className="flex h-full flex-col">
+      <p className="mb-3 shrink-0 text-sm text-muted">{dateLabel}</p>
+      <div className="grid min-h-0 flex-1 grid-cols-2 gap-3">
         {BOOKING_SLOTS.map((slot) => {
           const available = isSlotAvailable(day, slot);
           return (
@@ -31,7 +31,7 @@ export function SlotPicker({ day, onSelect }: SlotPickerProps) {
               type="button"
               disabled={!available}
               onClick={() => available && onSelect(slot)}
-              className={`rounded-xl border p-4 text-left transition-colors ${
+              className={`flex h-full min-h-[8rem] flex-col justify-center rounded-xl border px-4 py-4 text-left transition-colors ${
                 available
                   ? "border-border bg-background hover:border-accent hover:ring-2 hover:ring-accent/20"
                   : "cursor-not-allowed border-border/50 bg-background/50 opacity-50"

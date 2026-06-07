@@ -3,7 +3,7 @@ type LogoMarkProps = {
   title?: string;
 };
 
-/** Bold M monogram with Canterbury mountain — Mainland Building Inspections */
+/** M monogram with clean mountain backdrop — Mainland Building Inspections */
 export function LogoMark({
   className = "h-9 w-9",
   title = "Mainland Building Inspections",
@@ -18,28 +18,25 @@ export function LogoMark({
       aria-label={title}
     >
       <defs>
-        <linearGradient id="logoMarkMountain" x1="20" y1="5" x2="20" y2="18" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#5ec995" />
-          <stop offset="45%" stopColor="#40916c" />
+        <linearGradient
+          id="logoMarkMountain"
+          x1="20"
+          y1="6"
+          x2="20"
+          y2="40"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0%" stopColor="#52b788" />
+          <stop offset="55%" stopColor="#3a8f5c" />
           <stop offset="100%" stopColor="#2d6a4f" />
-        </linearGradient>
-        <linearGradient id="logoMarkSnow" x1="20" y1="5.5" x2="20" y2="9.5" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#ffffff" />
-          <stop offset="100%" stopColor="#e8f4fa" />
         </linearGradient>
       </defs>
       <rect width="40" height="40" rx="10" className="fill-navy" />
+      <path d="M5 40L20 7L35 40H5Z" fill="url(#logoMarkMountain)" />
+      <path d="M17.2 9L20 6.8L22.8 9L21.4 10.2H18.6L17.2 9Z" fill="#f4fafc" />
       <path
-        d="M6.5 17.5L13.5 10.5L17.5 7.5L20 5.5L22.8 8L27 11.5L33.5 17.5H6.5Z"
-        fill="url(#logoMarkMountain)"
-      />
-      <path
-        d="M17.2 8.2L20 5.5L22.8 8.2L21.6 9.4H18.4L17.2 8.2Z"
-        fill="url(#logoMarkSnow)"
-      />
-      <path
-        d="M9 32V13.5H14.2L20 25.8L25.8 13.5H31V32H26.2V18.8L20 29.5L13.8 18.8V32H9Z"
-        className="fill-white"
+        d="M10.5 34V15.8H14.6L20 26.2L25.4 15.8H29.5V34H26.1V20.8L20 29.8L13.9 20.8V34H10.5Z"
+        fill="#ffffff"
       />
     </svg>
   );

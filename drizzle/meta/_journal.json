@@ -15,6 +15,13 @@
       "when": 1749183600000,
       "tag": "0001_staff_users",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1749270000000,
+      "tag": "0002_availability_blocks",
+      "breakpoints": true
     }
   ]
 }

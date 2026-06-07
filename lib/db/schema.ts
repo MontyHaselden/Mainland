@@ -44,3 +44,25 @@ export const staffUsers = pgTable("staff_users", {
 
 export type StaffUser = typeof staffUsers.$inferSelect;
 export type NewStaffUser = typeof staffUsers.$inferInsert;
+
+export const availabilityBlocks = pgTable(
+  "availability_blocks",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    blockDate: date("block_date").notNull(),
+    slot: varchar("slot", { length: 20 }).notNull(),
+    note: text("note"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    unique("availability_blocks_date_slot_unique").on(
+      table.blockDate,
+      table.slot
+    ),
+  ]
+);
+
+export type AvailabilityBlock = typeof availabilityBlocks.$inferSelect;
+export type NewAvailabilityBlock = typeof availabilityBlocks.$inferInsert;

@@ -13,12 +13,11 @@
   --availability-green: #2d6a4f;
   --availability-orange: #d97706;
   --availability-red: #b91c1c;
-  --hero-object-position-desktop: 58% 42%;
-  --hero-object-position-mobile: 78% 40%;
-  /* Title hold → booking rise, then natural scroll */
-  --hero-title-hold: 80vh;
-  --hero-rise: 135vh;
-  --hero-scroll-distance: calc(var(--hero-title-hold) + var(--hero-rise));
+  --site-header-height: 4.5rem;
+  --hero-object-position-desktop: 58% 50%;
+  --hero-object-position-mobile: 78% 48%;
+  /* 100vh hero + title hold + anim + booking hold + exit */
+  --hero-scroll-distance: calc(100vh + 180vh);
 }
 
 @theme inline {
@@ -46,10 +45,6 @@ body {
 }
 
 .hero-pin-section {
-  height: calc(100vh + var(--hero-scroll-distance));
-}
-
-.hero-scroll-track {
   height: var(--hero-scroll-distance);
 }
 
@@ -63,6 +58,10 @@ body {
 
 .hero-scene-grade {
   filter: saturate(0.82) brightness(0.9) contrast(1.04);
+}
+
+.hero-title-panel {
+  box-shadow: 0 12px 40px rgba(15, 22, 32, 0.35);
 }
 
 .hero-scene-blueprint-tint {

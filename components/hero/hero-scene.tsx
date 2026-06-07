@@ -1,6 +1,5 @@
 "use client";
 
-import { getHeroFrameBlend } from "@/lib/hero/frame-blend";
 import { HeroDrone } from "./hero-drone";
 import { HeroImageStack } from "./hero-image-stack";
 
@@ -19,14 +18,15 @@ export function HeroScene({
   riseRaw,
   opacity = 1,
 }: HeroSceneProps) {
-  const endFrameOpacity = getHeroFrameBlend(riseRaw);
+  // Keep the inspector scene (start frame) for the full hero + booking scroll.
+  const endFrameOpacity = 0;
 
   return (
     <div
       className="absolute inset-0 z-[1]"
       style={{
         opacity,
-        pointerEvents: opacity < 0.05 ? "none" : "auto",
+        pointerEvents: "none",
       }}
       aria-hidden
     >
@@ -41,7 +41,7 @@ export function HeroScene({
         <div className="hero-scene-blueprint-tint absolute inset-0" />
       </div>
 
-      <div className="absolute inset-0 bg-gradient-to-r from-navy-deep/45 from-0% via-navy-deep/12 via-[32%] to-transparent to-[42%]" />
+      <div className="absolute inset-0 bg-gradient-to-r from-navy-deep/50 from-0% via-navy-deep/18 via-[36%] to-transparent to-[48%]" />
       <div className="absolute inset-0 bg-gradient-to-t from-navy-deep/25 via-transparent to-transparent md:hidden" />
     </div>
   );

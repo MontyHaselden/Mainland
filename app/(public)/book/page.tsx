@@ -21,7 +21,7 @@ export default async function BookPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-5 py-12 lg:py-16">
+    <div className="mx-auto max-w-4xl px-5 py-12 lg:py-16">
       <div className="mb-8">
         <h1 className="font-display text-4xl text-navy">Book an inspection</h1>
         <p className="mt-2 text-muted">

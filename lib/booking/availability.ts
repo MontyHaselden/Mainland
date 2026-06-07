@@ -3,6 +3,7 @@ import { toZonedTime } from "date-fns-tz";
 import { and, gte, lte } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { bookings } from "@/lib/db/schema";
+import { getBlockedSlotsForRange, isSlotBlocked } from "./blocks";
 import {
   BOOKING_SLOTS,
   NZ_TIMEZONE,
@@ -34,6 +35,30 @@ function statusFromBookedCount(count: number): AvailabilityStatus {
   if (count === 0) return "green";
   if (count === 1) return "orange";
   return "red";
+}
+
+function applyBlocksToDayAvailability(
+  day: DayAvailability,
+  blockedSlots: BookingSlot[]
+): DayAvailability {
+  const morningBlocked = isSlotBlocked(blockedSlots, "morning");
+  const afternoonBlocked = isSlotBlocked(blockedSlots, "afternoon");
+  const morningAvailable = day.morningAvailable && !morningBlocked;
+  const afternoonAvailable = day.afternoonAvailable && !afternoonBlocked;
+
+  const unavailableCount =
+    (!morningAvailable ? 1 : 0) + (!afternoonAvailable ? 1 : 0);
+
+  let status: AvailabilityStatus = "green";
+  if (unavailableCount === 1) status = "orange";
+  if (unavailableCount >= 2) status = "red";
+
+  return {
+    ...day,
+    morningAvailable,
+    afternoonAvailable,
+    status,
+  };
 }
 
 export function dayAvailabilityFromSlots(
@@ -83,11 +108,15 @@ export async function getMonthAvailability(
     byDate.set(date, slots);
   }
 
+  const blockedByDate = await getBlockedSlotsForRange(startStr, endStr);
+
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
   const days: DayAvailability[] = daysInMonth.map((d) => {
     const dateStr = format(d, "yyyy-MM-dd");
     const booked = byDate.get(dateStr) ?? [];
-    return dayAvailabilityFromSlots(dateStr, booked);
+    const blocked = blockedByDate.get(dateStr) ?? [];
+    const day = dayAvailabilityFromSlots(dateStr, booked);
+    return applyBlocksToDayAvailability(day, blocked);
   });
 
   return { month, days };
