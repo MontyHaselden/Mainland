@@ -19,30 +19,99 @@ export function LogoTwinPeaks({ className = "h-16 w-16", style }: LogoProps) {
   );
 }
 
-/** Clean mountain backdrop with premium M */
+/** Layered mountain backdrop with premium M */
 export function LogoSummit({ className = "h-16 w-16", style }: LogoProps) {
   return (
     <svg viewBox="0 0 80 80" fill="none" className={className} style={style} aria-hidden>
       <defs>
         <linearGradient
-          id="summitMountain"
-          x1="40"
+          id="summitFaceLight"
+          x1="24"
           y1="12"
+          x2="36"
+          y2="80"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0%" stopColor="#72dba0" />
+          <stop offset="55%" stopColor="#4aa876" />
+          <stop offset="100%" stopColor="#358a5c" />
+        </linearGradient>
+        <linearGradient
+          id="summitFaceShadow"
+          x1="56"
+          y1="12"
+          x2="44"
+          y2="80"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0%" stopColor="#3f8f5f" />
+          <stop offset="55%" stopColor="#2d6a4f" />
+          <stop offset="100%" stopColor="#1e4a36" />
+        </linearGradient>
+        <linearGradient
+          id="summitFoothill"
+          x1="40"
+          y1="64"
           x2="40"
           y2="80"
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0%" stopColor="#52b788" />
-          <stop offset="55%" stopColor="#3a8f5c" />
-          <stop offset="100%" stopColor="#2d6a4f" />
+          <stop offset="0%" stopColor="#2d6a4f" />
+          <stop offset="100%" stopColor="#1a3d2c" />
+        </linearGradient>
+        <linearGradient
+          id="summitSnow"
+          x1="40"
+          y1="10"
+          x2="40"
+          y2="28"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0%" stopColor="#ffffff" />
+          <stop offset="100%" stopColor="#d8ecf5" />
         </linearGradient>
       </defs>
       <rect width="80" height="80" rx="18" fill="#1a2332" />
-      <path d="M10 80L40 14L70 80H10Z" fill="url(#summitMountain)" />
-      <path d="M34.5 18L40 13.5L45.5 18L43.2 20.4H36.8L34.5 18Z" fill="#f4fafc" />
       <path
-        d="M21 68V31.5H29.2L40 52.4L50.8 31.5H59V68H53.2V41.6L40 59.6L26.8 41.6V68H21Z"
+        d="M0 80C8 73 14 70 20 73C25 75.6 28 77 32 76C36 75 40 74.4 44 76C48 77.6 53 75.6 60 73C66 70 72 73 80 80V80H0Z"
+        fill="url(#summitFoothill)"
+        opacity="0.9"
+      />
+      <path
+        d="M6 80L23 55L31 37L37 22L40 11L40 80H6Z"
+        fill="url(#summitFaceLight)"
+      />
+      <path
+        d="M40 11L43 22L49 37L57 55L74 80H40V11Z"
+        fill="url(#summitFaceShadow)"
+      />
+      <path
+        d="M40 11L42 23L48 40L56 58L64 72L74 80"
+        stroke="#1a3d2c"
+        strokeWidth="1.2"
+        opacity="0.25"
+        fill="none"
+      />
+      <path
+        d="M31.6 25L36.4 17.6L40 11L43.6 17.6L48.4 25L44.8 28H35.2L31.6 25Z"
+        fill="url(#summitSnow)"
+      />
+      <path
+        d="M35.6 20.4L40 15.6L44.4 20.4L41.6 22.4H38.4L35.6 20.4Z"
+        fill="#ffffff"
+        opacity="0.85"
+      />
+      <path
+        d="M20.4 68.4V30.4H28.2L40 50.4L51.8 30.4H59.6V68.4H53V41.6L40 58.4L27 41.6V68.4H20.4Z"
         fill="#fff"
+      />
+      <path
+        d="M20.4 68.4V30.4H28.2L40 50.4L51.8 30.4H59.6V68.4H53V41.6L40 58.4L27 41.6V68.4H20.4Z"
+        stroke="#ffffff"
+        strokeWidth="0.7"
+        strokeLinejoin="round"
+        opacity="0.35"
+        fill="none"
       />
     </svg>
   );
@@ -236,9 +305,9 @@ export const LOGO_CONCEPTS = [
   {
     id: "summit",
     name: "Summit",
-    tagline: "Clean mountain backdrop + premium M",
+    tagline: "Layered mountain backdrop + premium M",
     description:
-      "Simple full-height mountain to the frame edge, small snow cap, refined white M in front.",
+      "Sun and shadow faces, foothills, snow cap, and refined white M — full height to the frame edge.",
     Mark: LogoSummit,
     wordmark: true,
     wide: false,

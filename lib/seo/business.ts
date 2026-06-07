@@ -16,6 +16,9 @@ export const SERVICE_AREA_MAP_EMBED =
 
 export const SAMPLE_REPORT_PATH = "/sample-report";
 
+export const GOOGLE_BUSINESS_PROFILE_URL =
+  "https://share.google/8xIwFcTFL6WTnrs9s";
+
 export const INSPECTION_SERVICES = [
   "Pre-purchase building inspections",
   "Pre-sale building inspections",

@@ -11,7 +11,7 @@ export function LocationPostcodesSeo({ location }: LocationPostcodesSeoProps) {
   const formatted = formatLocationPostcodes(location);
 
   return (
-    <p>
+    <p className="mt-4 text-sm text-white/60">
       Building inspections in {location.name}, Canterbury — postcodes {formatted}.
       Pre-purchase inspections, roof inspections, moisture testing, thermal
       imaging, drone inspections, and Spectora digital reports.

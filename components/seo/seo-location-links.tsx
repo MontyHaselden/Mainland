@@ -1,40 +1,38 @@
 import Link from "next/link";
-import { SeoOnly } from "@/components/seo/seo-only";
 import {
-  formatLocationPostcodes,
-  getLocationTitle,
+  getLocationLinkLabel,
   locationPath,
 } from "@/lib/seo/location-helpers";
-import { LOCATIONS, REGION_LABELS } from "@/lib/seo/locations";
+import { getFeaturedLocations } from "@/lib/seo/locations";
 
 export function SeoLocationLinks() {
+  const featuredLocations = getFeaturedLocations();
+
   return (
-    <SeoOnly>
-      <nav aria-label="Building inspection service areas">
-        <h2>Building Inspections Across Christchurch &amp; Canterbury</h2>
-        <p>
-          Mainland Building Inspections services Christchurch CBD, surrounding
-          suburbs, and greater Canterbury.
-        </p>
-        <Link href="/service-areas">Building inspection service areas</Link>
-        {(["christchurch", "greater-canterbury"] as const).map((region) => (
-          <div key={region}>
-            <h3>{REGION_LABELS[region]}</h3>
-            <ul>
-              {LOCATIONS.filter((l) => l.region === region).map((location) => (
-                <li key={location.slug}>
-                  <Link href={locationPath(location.slug)}>
-                    {getLocationTitle(location)}
-                    {location.postcodes.length > 0
-                      ? ` — postcodes ${formatLocationPostcodes(location)}`
-                      : null}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+    <nav aria-label="Building inspection service areas" className="mt-8">
+      <h2 className="font-display text-lg text-navy">
+        Areas we serve
+      </h2>
+      <ul className="mt-4 flex flex-wrap gap-2">
+        {featuredLocations.map((location) => (
+          <li key={location.slug}>
+            <Link
+              href={locationPath(location.slug)}
+              className="inline-flex rounded-full border border-border bg-surface px-3 py-1.5 text-sm text-muted transition-colors hover:border-accent/40 hover:text-accent"
+            >
+              {getLocationLinkLabel(location)}
+            </Link>
+          </li>
         ))}
-      </nav>
-    </SeoOnly>
+        <li>
+          <Link
+            href="/service-areas"
+            className="inline-flex rounded-full border border-accent/30 bg-accent/5 px-3 py-1.5 text-sm font-medium text-accent transition-colors hover:bg-accent/10"
+          >
+            All service areas
+          </Link>
+        </li>
+      </ul>
+    </nav>
   );
 }

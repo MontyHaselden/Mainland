@@ -1,7 +1,7 @@
 import Link from "next/link";
 import {
   formatLocationPostcodes,
-  getLocationTitle,
+  getLocationLinkLabel,
   getLocationsByRegion,
   locationPath,
 } from "@/lib/seo/location-helpers";
@@ -51,7 +51,7 @@ export function ServiceAreasGrid({
                     }
                   >
                     <span className="font-medium text-navy group-hover:text-accent">
-                      {getLocationTitle(location)}
+                      {getLocationLinkLabel(location)}
                     </span>
                     {!compact ? (
                       <span className="mt-1 text-sm text-muted">

@@ -1,12 +1,13 @@
 import Link from "next/link";
-import { LocationPageVisible } from "@/components/location/location-page-visible";
 import { JsonLd } from "@/components/seo/json-ld";
 import { LocationPostcodesSeo } from "@/components/seo/location-postcodes-seo";
-import { SeoOnly } from "@/components/seo/seo-only";
-import { formatLocationPostcodes } from "@/lib/seo/location-helpers";
-import { SAMPLE_REPORT_PATH } from "@/lib/seo/business";
 import {
-  getLocationTitle,
+  BUSINESS_PHONE,
+  GOOGLE_BUSINESS_PROFILE_URL,
+  SAMPLE_REPORT_PATH,
+} from "@/lib/seo/business";
+import {
+  formatLocationPostcodes,
   locationPath,
   resolveNearbyLocations,
 } from "@/lib/seo/location-helpers";
@@ -62,7 +63,7 @@ type LocationPageTemplateProps = {
 
 export function LocationPageTemplate({ location }: LocationPageTemplateProps) {
   const nearby = resolveNearbyLocations(location);
-  const h1 = getLocationTitle(location);
+  const phoneHref = `tel:${BUSINESS_PHONE.replace(/\s/g, "")}`;
 
   const faqs = [
     {
@@ -108,22 +109,22 @@ export function LocationPageTemplate({ location }: LocationPageTemplateProps) {
         ]}
       />
 
-      <LocationPageVisible location={location} />
-
-      <SeoOnly>
       <section className="border-b border-border bg-navy-deep text-white">
         <div className="mx-auto max-w-7xl px-5 py-16 lg:px-8 lg:py-24">
           <p className="text-sm font-semibold uppercase tracking-widest text-white/60">
             Canterbury · Licensed builder · Spectora reports
           </p>
           <h1 className="font-display mt-4 max-w-4xl text-4xl leading-tight sm:text-5xl lg:text-6xl">
-            {h1}
+            <a
+              href={GOOGLE_BUSINESS_PROFILE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-colors hover:text-white/90"
+            >
+              {location.h1}
+            </a>
           </h1>
-          <p className="mt-6 max-w-2xl text-lg text-white/80">
-            Premium building inspections in {location.name} using drone roof
-            checks, moisture testing, thermal imaging and detailed digital
-            reports.
-          </p>
+          <p className="mt-6 max-w-2xl text-lg text-white/80">{location.h2}</p>
           <LocationPostcodesSeo location={location} />
           <div className="mt-10 flex flex-col gap-3 sm:flex-row">
             <Link
@@ -132,11 +133,17 @@ export function LocationPageTemplate({ location }: LocationPageTemplateProps) {
             >
               Book inspection
             </Link>
-            <Link
-              href={SAMPLE_REPORT_PATH}
+            <a
+              href={phoneHref}
               className="inline-flex min-h-12 items-center justify-center rounded-lg border border-white/25 px-8 font-semibold text-white transition-colors hover:bg-white/10"
             >
-              View sample report
+              Call {BUSINESS_PHONE}
+            </a>
+            <Link
+              href="/contact"
+              className="inline-flex min-h-12 items-center justify-center rounded-lg border border-white/25 px-8 font-semibold text-white transition-colors hover:bg-white/10"
+            >
+              Contact us
             </Link>
           </div>
         </div>
@@ -144,34 +151,76 @@ export function LocationPageTemplate({ location }: LocationPageTemplateProps) {
 
       <section className="bg-background">
         <div className="mx-auto max-w-7xl px-5 py-16 lg:px-8 lg:py-20">
-          <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
-            <div>
-              <h2 className="font-display text-2xl text-navy sm:text-3xl">
-                Trusted building inspections in {location.name}
-              </h2>
-              <p className="mt-5 text-lg text-muted">{location.intro}</p>
+          {location.seoBodyParagraphs && location.seoBodyCta ? (
+            <div className="grid gap-12 lg:grid-cols-[1fr_320px] lg:gap-16">
+              <div className="max-w-3xl">
+                <h2 className="font-display text-2xl text-navy sm:text-3xl">
+                  Professional building inspections in {location.name}
+                </h2>
+                <div className="mt-6 space-y-5 text-lg text-muted">
+                  {location.seoBodyParagraphs.map((paragraph) => (
+                    <p key={paragraph.slice(0, 48)}>{paragraph}</p>
+                  ))}
+                  <p>
+                    <Link
+                      href="/book"
+                      className="font-semibold text-accent transition-colors hover:text-accent-light"
+                    >
+                      {location.seoBodyCta}
+                    </Link>
+                  </p>
+                </div>
+              </div>
+              <div className="rounded-2xl border border-border bg-surface p-8 lg:self-start">
+                <h3 className="font-display text-lg text-navy">
+                  What you receive
+                </h3>
+                <ul className="mt-6 space-y-3 text-sm text-muted">
+                  <li className="flex gap-3">
+                    <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent" />
+                    Licensed Building Practitioner (LBP) assessment
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent" />
+                    Drone roof, moisture meter, and thermal imaging on site
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent" />
+                    Spectora interactive reports with fast turnaround
+                  </li>
+                </ul>
+              </div>
             </div>
-            <div className="rounded-2xl border border-border bg-surface p-8 lg:p-10">
-              <h2 className="font-display text-xl text-navy">
-                Why {location.name} homeowners choose Mainland
-              </h2>
-              <p className="mt-4 text-muted">{location.trustContext}</p>
-              <ul className="mt-6 space-y-3 text-sm text-muted">
-                <li className="flex gap-3">
-                  <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent" />
-                  Pre-purchase, pre-sale, and specialist inspections
-                </li>
-                <li className="flex gap-3">
-                  <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent" />
-                  Drone roof, moisture, and thermal imaging on site
-                </li>
-                <li className="flex gap-3">
-                  <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent" />
-                  Spectora digital reports delivered within 24 hours
-                </li>
-              </ul>
+          ) : (
+            <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
+              <div>
+                <h2 className="font-display text-2xl text-navy sm:text-3xl">
+                  Trusted building inspections in {location.name}
+                </h2>
+                <p className="mt-5 text-lg text-muted">{location.intro}</p>
+              </div>
+              <div className="rounded-2xl border border-border bg-surface p-8 lg:p-10">
+                <h2 className="font-display text-xl text-navy">
+                  Why {location.name} homeowners choose Mainland
+                </h2>
+                <p className="mt-4 text-muted">{location.trustContext}</p>
+                <ul className="mt-6 space-y-3 text-sm text-muted">
+                  <li className="flex gap-3">
+                    <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent" />
+                    Pre-purchase, pre-sale, and specialist inspections
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent" />
+                    Drone roof, moisture, and thermal imaging on site
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent" />
+                    Spectora digital reports delivered within 24 hours
+                  </li>
+                </ul>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </section>
 
@@ -246,7 +295,7 @@ export function LocationPageTemplate({ location }: LocationPageTemplateProps) {
                     href={locationPath(area.slug)}
                     className="inline-flex rounded-full border border-border bg-background px-5 py-2.5 text-sm font-medium text-navy transition-colors hover:border-accent/40 hover:text-accent"
                   >
-                    {getLocationTitle(area)}
+                    {area.name}
                   </Link>
                 </li>
               ))}
@@ -296,6 +345,12 @@ export function LocationPageTemplate({ location }: LocationPageTemplateProps) {
             >
               Book inspection
             </Link>
+            <a
+              href={phoneHref}
+              className="inline-flex min-h-12 items-center justify-center rounded-lg border border-white/25 px-8 font-semibold text-white transition-colors hover:bg-white/10"
+            >
+              Call {BUSINESS_PHONE}
+            </a>
             <Link
               href={SAMPLE_REPORT_PATH}
               className="inline-flex min-h-12 items-center justify-center rounded-lg border border-white/25 px-8 font-semibold text-white transition-colors hover:bg-white/10"
@@ -305,7 +360,6 @@ export function LocationPageTemplate({ location }: LocationPageTemplateProps) {
           </div>
         </div>
       </section>
-      </SeoOnly>
     </>
   );
 }

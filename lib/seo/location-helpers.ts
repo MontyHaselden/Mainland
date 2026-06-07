@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { BUSINESS_NAME } from "./business";
+import { featuredSeoBodyText } from "./featured-locations";
 import {
   LOCATION_SLUG_PREFIX,
   LOCATIONS,
@@ -24,6 +25,14 @@ export function getLocationsByRegion(region: LocationRegion): Location[] {
 }
 
 export function getLocationTitle(location: Location): string {
+  const suffix = ` | ${BUSINESS_NAME}`;
+  if (location.h1.endsWith(suffix)) {
+    return location.h1.slice(0, -suffix.length);
+  }
+  return location.h1;
+}
+
+export function getLocationLinkLabel(location: Location): string {
   return `Building Inspections ${location.name}`;
 }
 
@@ -31,20 +40,41 @@ export function formatLocationPostcodes(location: Location): string {
   return location.postcodes.join(", ");
 }
 
+function excerptText(text: string, maxLen = 155): string {
+  const full = text.replace(/\s+/g, " ");
+  if (full.length <= maxLen) return full;
+  const trimmed = full.slice(0, maxLen);
+  const lastSpace = trimmed.lastIndexOf(" ");
+  return `${trimmed.slice(0, lastSpace)}…`;
+}
+
 export function getLocationMetaDescription(location: Location): string {
-  return `Book a premium building inspection in ${location.name} with ${BUSINESS_NAME}. Drone roof inspections, moisture testing, thermal imaging and detailed Spectora reports.`;
+  if (location.seoBodyParagraphs && location.seoBodyCta) {
+    return excerptText(
+      featuredSeoBodyText({
+        h1: location.h1,
+        h2: location.h2,
+        seoBodyParagraphs: location.seoBodyParagraphs,
+        seoBodyCta: location.seoBodyCta,
+      }),
+    );
+  }
+  return `${location.h2}. Book with ${BUSINESS_NAME} — drone roof inspections, moisture testing, thermal imaging and detailed Spectora reports.`;
 }
 
 export function getLocationMetadata(location: Location): Metadata {
+  const title = getLocationTitle(location);
+  const description = getLocationMetaDescription(location);
+
   return {
-    title: getLocationTitle(location),
-    description: getLocationMetaDescription(location),
+    title,
+    description,
     alternates: {
       canonical: locationPath(location.slug),
     },
     openGraph: {
-      title: `${getLocationTitle(location)} | ${BUSINESS_NAME}`,
-      description: getLocationMetaDescription(location),
+      title: location.h1,
+      description,
       type: "website",
     },
   };

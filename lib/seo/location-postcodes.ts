@@ -1,5 +1,26 @@
-/** NZ postcodes by location slug — used in hidden SEO content and schema */
+/** NZ postcodes by location slug — used in SEO content and schema */
 export const LOCATION_POSTCODES: Record<string, string[]> = {
+  "building-inspections-christchurch": [
+    "8011",
+    "8013",
+    "8014",
+    "8022",
+    "8023",
+    "8024",
+    "8025",
+    "8041",
+    "8042",
+    "8050",
+    "8051",
+    "8052",
+    "8053",
+    "8061",
+    "8062",
+    "8063",
+    "8081",
+    "8082",
+    "8083",
+  ],
   "building-inspections-christchurch-cbd": ["8011", "8013", "8014"],
   "building-inspections-riccarton": ["8041"],
   "building-inspections-hornby": ["8042"],
@@ -44,4 +65,5 @@ export const LOCATION_POSTCODES: Record<string, string[]> = {
   "building-inspections-oxford": ["7430"],
   "building-inspections-akaroa": ["7520"],
   "building-inspections-lyttelton": ["8082", "8971"],
+  "building-inspections-templeton": ["8042", "7678"],
 };
