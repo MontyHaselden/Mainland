@@ -1,5 +1,10 @@
 import type { AvailabilityStatus } from "./constants";
 import type { BookingSlot } from "./constants";
+import type {
+  DecadeBuilt,
+  PropertyType,
+  StoreyOption,
+} from "./property-options";
 
 export type DayAvailability = {
   date: string;
@@ -47,6 +52,16 @@ export type StaffCalendarMonthResponse = {
   days: StaffCalendarDaySummary[];
 };
 
+export type PropertyDetailsInput = {
+  streetAddress: string;
+  suburb: string;
+  city: string;
+  floorAreaSqm: number | null;
+  decadeBuilt: DecadeBuilt;
+  propertyType: PropertyType;
+  storeys: StoreyOption;
+};
+
 export type CreateBookingPayload = {
   inspectionDate: string;
   slot: BookingSlot;
@@ -54,8 +69,13 @@ export type CreateBookingPayload = {
   customerEmail: string;
   customerPhone: string;
   propertyAddress: string;
+  propertySuburb: string;
+  propertyCity: string;
+  floorAreaSqm: number | null;
+  decadeBuilt: DecadeBuilt;
+  propertyType: PropertyType;
+  storeys: StoreyOption;
+  estimatedPrice?: number | null;
+  reviewFlags?: string[];
   notes?: string;
-  agentName?: string;
-  pricingTierLabel?: string;
-  price?: number;
 };

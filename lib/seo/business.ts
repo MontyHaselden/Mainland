@@ -4,10 +4,15 @@ export const BUSINESS_PHONE =
   process.env.NEXT_PUBLIC_BUSINESS_PHONE ?? "03 000 0000";
 
 export const BUSINESS_EMAIL =
-  process.env.NEXT_PUBLIC_BUSINESS_EMAIL ?? "hello@mainlandinspections.co.nz";
+  process.env.NEXT_PUBLIC_BUSINESS_EMAIL ??
+  "hello@mainlandbuildinginspections.co.nz";
 
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://mainlandinspections.co.nz";
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  "https://www.mainlandbuildinginspections.co.nz";
+
+/** Square logo for favicon, schema.org, and Google */
+export const BUSINESS_LOGO_PATH = "/logo/profile/mainland-mark-gmail-profile-512.png";
 
 /** Service-area map centred on Christchurch & Canterbury */
 export const SERVICE_AREA_MAP_EMBED =

@@ -8,7 +8,8 @@ export const metadata: Metadata = {
 
 const PHONE = process.env.NEXT_PUBLIC_BUSINESS_PHONE ?? "03 000 0000";
 const EMAIL =
-  process.env.NEXT_PUBLIC_BUSINESS_EMAIL ?? "hello@mainlandinspections.co.nz";
+  process.env.NEXT_PUBLIC_BUSINESS_EMAIL ??
+  "hello@mainlandbuildinginspections.co.nz";
 
 export default function ContactPage() {
   return (

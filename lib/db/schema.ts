@@ -1,5 +1,6 @@
 import {
   date,
+  integer,
   pgTable,
   text,
   timestamp,
@@ -14,11 +15,32 @@ export const bookings = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     inspectionDate: date("inspection_date").notNull(),
     slot: varchar("slot", { length: 20 }).notNull(),
-    status: varchar("status", { length: 20 }).notNull().default("confirmed"),
+    status: varchar("status", { length: 30 })
+      .notNull()
+      .default("pending_review"),
     customerName: varchar("customer_name", { length: 255 }).notNull(),
     customerEmail: varchar("customer_email", { length: 255 }).notNull(),
     customerPhone: varchar("customer_phone", { length: 50 }).notNull(),
     propertyAddress: text("property_address").notNull(),
+    propertySuburb: varchar("property_suburb", { length: 255 }),
+    propertyCity: varchar("property_city", { length: 255 }),
+    floorAreaSqm: integer("floor_area_sqm"),
+    /** @deprecated Legacy band selection — use floorAreaSqm */
+    floorAreaBand: varchar("floor_area_band", { length: 50 }),
+    decadeBuilt: varchar("decade_built", { length: 30 }),
+    propertyType: varchar("property_type", { length: 50 }),
+    storeys: varchar("storeys", { length: 30 }),
+    estimatedPrice: integer("estimated_price"),
+    finalPrice: integer("final_price"),
+    adminFloorAreaSqm: integer("admin_floor_area_sqm"),
+    /** @deprecated Use adminFloorAreaSqm */
+    exactFloorAreaSqm: integer("exact_floor_area_sqm"),
+    reviewFlags: text("review_flags"),
+    adminNotes: text("admin_notes"),
+    adminFloorAreaBand: varchar("admin_floor_area_band", { length: 50 }),
+    adminDecadeBuilt: varchar("admin_decade_built", { length: 30 }),
+    adminPropertyType: varchar("admin_property_type", { length: 50 }),
+    adminStoreys: varchar("admin_storeys", { length: 30 }),
     notes: text("notes"),
     agentName: varchar("agent_name", { length: 255 }),
     acknowledgedAt: timestamp("acknowledged_at", { withTimezone: true }),
@@ -81,3 +103,13 @@ export const contactMessages = pgTable("contact_messages", {
 
 export type ContactMessage = typeof contactMessages.$inferSelect;
 export type NewContactMessage = typeof contactMessages.$inferInsert;
+
+export const pricingRules = pgTable("pricing_rules", {
+  id: varchar("id", { length: 50 }).primaryKey(),
+  rules: text("rules").notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export type PricingRulesRow = typeof pricingRules.$inferSelect;

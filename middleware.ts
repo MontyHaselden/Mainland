@@ -15,7 +15,28 @@ async function verifyToken(token: string): Promise<boolean> {
   }
 }
 
+function canonicalRedirect(request: NextRequest): NextResponse | null {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (!siteUrl) return null;
+
+  try {
+    const canonical = new URL(siteUrl);
+    const requestHost = request.headers.get("host")?.toLowerCase();
+    if (!requestHost || requestHost === canonical.host) return null;
+
+    const target = request.nextUrl.clone();
+    target.protocol = canonical.protocol;
+    target.host = canonical.host;
+    return NextResponse.redirect(target, 308);
+  } catch {
+    return null;
+  }
+}
+
 export async function middleware(request: NextRequest) {
+  const redirect = canonicalRedirect(request);
+  if (redirect) return redirect;
+
   const { pathname } = request.nextUrl;
 
   if (!pathname.startsWith("/staff")) {
@@ -43,5 +64,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/staff/:path*"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+  ],
 };

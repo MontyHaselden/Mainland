@@ -3,20 +3,17 @@
 import { format, parseISO } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { SLOT_LABELS, type BookingSlot } from "@/lib/booking/constants";
-import type { StandardPricingTier } from "@/lib/pricing/standard-inspections";
+import type { CustomerPricingDisplay } from "@/lib/booking/pricing-rules-types";
+import { formatFloorAreaDisplay } from "@/lib/booking/property-options";
+import type { PropertyDetailsInput } from "@/lib/booking/types";
+import type { CustomerFormValues } from "./customer-form";
 
 type ConfirmStepProps = {
   date: string;
   slot: BookingSlot;
-  tier: StandardPricingTier;
-  form: {
-    customerName: string;
-    customerEmail: string;
-    customerPhone: string;
-    propertyAddress: string;
-    notes: string;
-    agentName: string;
-  };
+  property: PropertyDetailsInput;
+  pricingDisplay: CustomerPricingDisplay;
+  customer: CustomerFormValues;
   onConfirm: () => void;
   submitting: boolean;
 };
@@ -24,16 +21,12 @@ type ConfirmStepProps = {
 function SummaryField({
   label,
   value,
-  className = "",
 }: {
   label: string;
   value: string;
-  className?: string;
 }) {
   return (
-    <div
-      className={`rounded-lg border border-border/80 bg-background/80 px-3.5 py-2.5 ${className}`}
-    >
+    <div className="rounded-lg border border-border/80 bg-background/80 px-3.5 py-2.5">
       <p className="text-[0.65rem] font-bold uppercase tracking-wider text-muted">
         {label}
       </p>
@@ -45,8 +38,9 @@ function SummaryField({
 export function ConfirmStep({
   date,
   slot,
-  tier,
-  form,
+  property,
+  pricingDisplay,
+  customer,
   onConfirm,
   submitting,
 }: ConfirmStepProps) {
@@ -55,7 +49,7 @@ export function ConfirmStep({
   return (
     <div className="flex h-full min-h-0 flex-col">
       <p className="mb-3 shrink-0 text-sm text-muted">
-        Check everything looks right, then confirm your booking.
+        Review your booking request before submitting.
       </p>
 
       <div className="mb-3 shrink-0 rounded-xl border border-accent/20 bg-accent/5 px-4 py-3">
@@ -66,30 +60,31 @@ export function ConfirmStep({
           {dateLabel}
         </p>
         <p className="mt-1 text-sm font-medium text-muted">
-          {SLOT_LABELS[slot]} slot · {tier.sizeLabel}
-          {tier.price != null ? ` · $${tier.price}` : ""}
+          {SLOT_LABELS[slot]} slot
         </p>
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto pr-0.5">
-        <p className="mb-2 text-[0.65rem] font-bold uppercase tracking-wider text-muted">
-          Your details
-        </p>
         <div className="grid gap-2 sm:grid-cols-2">
-          <SummaryField label="Name" value={form.customerName} />
-          <SummaryField label="Property" value={form.propertyAddress} />
-          <SummaryField label="Email" value={form.customerEmail} />
-          <SummaryField label="Phone" value={form.customerPhone} />
-          {form.agentName && (
-            <SummaryField label="Agent" value={form.agentName} />
-          )}
-          {form.notes && (
-            <SummaryField
-              label="Notes"
-              value={form.notes}
-              className="sm:col-span-2"
-            />
-          )}
+          <SummaryField label="Address" value={property.streetAddress} />
+          <SummaryField
+            label="Location"
+            value={`${property.suburb}, ${property.city}`}
+          />
+          <SummaryField
+            label="Floor area"
+            value={formatFloorAreaDisplay(property.floorAreaSqm)}
+          />
+          <SummaryField label="Decade built" value={property.decadeBuilt} />
+          <SummaryField label="Property type" value={property.propertyType} />
+          <SummaryField label="Storeys" value={property.storeys} />
+          <SummaryField label="Pricing" value={pricingDisplay.headline} />
+          <SummaryField label="Name" value={customer.customerName} />
+          <SummaryField label="Email" value={customer.customerEmail} />
+          <SummaryField label="Phone" value={customer.customerPhone} />
+          {customer.notes ? (
+            <SummaryField label="Notes" value={customer.notes} />
+          ) : null}
         </div>
       </div>
 
@@ -99,7 +94,7 @@ export function ConfirmStep({
         onClick={onConfirm}
         disabled={submitting}
       >
-        {submitting ? "Confirming…" : "Confirm booking"}
+        {submitting ? "Submitting…" : "Request Booking"}
       </Button>
     </div>
   );

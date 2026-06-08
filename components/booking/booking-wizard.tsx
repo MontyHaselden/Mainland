@@ -13,32 +13,55 @@ import {
   NZ_TIMEZONE,
   type BookingSlot,
 } from "@/lib/booking/constants";
+import { DEFAULT_PRICING_RULES } from "@/lib/booking/default-pricing-rules";
+import { evaluatePricing } from "@/lib/booking/pricing-engine";
+import type { PricingRulesConfig } from "@/lib/booking/pricing-rules-types";
+import { formatFullPropertyAddress } from "@/lib/booking/property-options";
 import { INSPECTION_FROM_PRICE } from "@/lib/seo/business";
-import type { StandardPricingTier } from "@/lib/pricing/standard-inspections";
 import type {
   CreateBookingPayload,
   DayAvailability,
+  PropertyDetailsInput,
 } from "@/lib/booking/types";
 import { BookingSuccess } from "./booking-success";
 import { ConfirmStep } from "./confirm-step";
-import { CustomerForm } from "./customer-form";
+import {
+  CustomerForm,
+  type CustomerFormValues,
+} from "./customer-form";
 import { DateCalendar } from "./date-calendar";
-import { PackagePicker } from "./package-picker";
+import { PricingDisplayStep } from "./pricing-display-step";
+import {
+  PropertyAddressStep,
+  type PropertyAddressValues,
+} from "./property-address-step";
+import {
+  PropertyDetailsStep,
+  type PropertyDetailsValues,
+} from "./property-details-step";
 import { SlotPicker } from "./slot-picker";
 
-type Step = "date" | "slot" | "package" | "details" | "confirm" | "success";
+type Step =
+  | "date"
+  | "slot"
+  | "address"
+  | "property"
+  | "pricing"
+  | "customer"
+  | "confirm"
+  | "success";
 
 export type BookingWizardVariant = "homepage" | "page" | "embedded";
 export type BookingSubmitMode = "preview" | "live";
 
-/** Fixed body height — calendar and most steps; package scrolls on small screens */
 export const BOOKING_STEP_BODY_CLASS = "min-h-[24.5rem]";
 
 const STEPS: { id: Step; label: string }[] = [
-  { id: "date", label: "Date" },
-  { id: "slot", label: "Time" },
-  { id: "package", label: "Package" },
-  { id: "details", label: "Details" },
+  { id: "date", label: "Schedule" },
+  { id: "address", label: "Address" },
+  { id: "property", label: "Property" },
+  { id: "pricing", label: "Pricing" },
+  { id: "customer", label: "Details" },
   { id: "confirm", label: "Confirm" },
 ];
 
@@ -61,7 +84,6 @@ type BookingWizardProps = {
   variant?: BookingWizardVariant;
   submitMode?: BookingSubmitMode;
   availabilitySource?: AvailabilitySource;
-  /** @deprecated Use availabilitySource instead */
   embedded?: boolean;
   initialMonth?: string;
   initialDays?: DayAvailability[];
@@ -86,11 +108,12 @@ function WizardHeader({
           <p className="mt-0.5 text-sm text-muted">
             Pre-purchase inspection · From ${INSPECTION_FROM_PRICE}
           </p>
-        ) : variant === "homepage" ? (
+        ) : (
           <p className="mt-0.5 text-sm text-muted">
-            Select a date, time and package to request your inspection
+            Choose a date, tell us about the property, and request your
+            inspection
           </p>
-        ) : null}
+        )}
       </div>
       {showBack ? (
         <Button
@@ -109,13 +132,34 @@ function WizardHeader({
 }
 
 function StepIndicator({ step }: { step: Step }) {
-  const activeIndex = STEPS.findIndex((s) => s.id === step);
+  const stepOrder: Step[] = [
+    "date",
+    "slot",
+    "address",
+    "property",
+    "pricing",
+    "customer",
+    "confirm",
+  ];
+  const activeIndex = stepOrder.indexOf(step);
 
   return (
     <ol className="mt-4 flex gap-1 overflow-x-auto pb-1">
       {STEPS.map((s, index) => {
-        const isActive = s.id === step;
-        const isComplete = index < activeIndex;
+        const stepIds: Step[] =
+          s.id === "date"
+            ? ["date", "slot"]
+            : s.id === "address"
+              ? ["address"]
+              : s.id === "property"
+                ? ["property"]
+                : s.id === "pricing"
+                  ? ["pricing"]
+                  : s.id === "customer"
+                    ? ["customer"]
+                    : ["confirm"];
+        const isActive = stepIds.includes(step);
+        const isComplete = stepOrder.indexOf(stepIds[stepIds.length - 1]) < activeIndex;
         return (
           <li
             key={s.id}
@@ -150,6 +194,8 @@ export function BookingWizard({
   const nextMonth = getNzNextMonth(currentMonth);
 
   const [step, setStep] = useState<Step>("date");
+  const [pricingRules, setPricingRules] =
+    useState<PricingRulesConfig>(DEFAULT_PRICING_RULES);
   const [currentDays, setCurrentDays] = useState<DayAvailability[]>(
     initialDays ?? [],
   );
@@ -157,20 +203,72 @@ export function BookingWizard({
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<BookingSlot | null>(null);
-  const [selectedTier, setSelectedTier] = useState<StandardPricingTier | null>(
-    null,
+  const [address, setAddress] = useState<PropertyAddressValues>({
+    streetAddress: "",
+    suburb: "",
+    city: "",
+  });
+  const [propertyDetails, setPropertyDetails] = useState<PropertyDetailsValues>(
+    {
+      floorAreaSqm: undefined,
+      decadeBuilt: "",
+      propertyType: "",
+      storeys: "",
+    },
   );
-  const [form, setForm] = useState({
+  const [customer, setCustomer] = useState<CustomerFormValues>({
     customerName: "",
     customerEmail: "",
     customerPhone: "",
-    propertyAddress: "",
     notes: "",
-    agentName: "",
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [bookingId, setBookingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    void fetch("/api/pricing-rules")
+      .then((res) => res.json())
+      .then((data: { rules?: PricingRulesConfig }) => {
+        if (data.rules) setPricingRules(data.rules);
+      })
+      .catch(() => {
+        /* defaults already loaded */
+      });
+  }, []);
+
+  const propertyInput = useMemo((): PropertyDetailsInput | null => {
+    if (
+      propertyDetails.floorAreaSqm === undefined ||
+      !propertyDetails.decadeBuilt ||
+      !propertyDetails.propertyType ||
+      !propertyDetails.storeys
+    ) {
+      return null;
+    }
+    return {
+      streetAddress: address.streetAddress,
+      suburb: address.suburb,
+      city: address.city,
+      floorAreaSqm: propertyDetails.floorAreaSqm,
+      decadeBuilt: propertyDetails.decadeBuilt,
+      propertyType: propertyDetails.propertyType,
+      storeys: propertyDetails.storeys,
+    };
+  }, [address, propertyDetails]);
+
+  const pricingEvaluation = useMemo(() => {
+    if (!propertyInput) return null;
+    return evaluatePricing(
+      {
+        floorAreaSqm: propertyInput.floorAreaSqm,
+        decadeBuilt: propertyInput.decadeBuilt,
+        propertyType: propertyInput.propertyType,
+        storeys: propertyInput.storeys,
+      },
+      pricingRules,
+    );
+  }, [propertyInput, pricingRules]);
 
   const loadAvailability = useCallback(async () => {
     setError(null);
@@ -198,18 +296,20 @@ export function BookingWizard({
     () => [...currentDays, ...nextDays],
     [currentDays, nextDays],
   );
-
   const selectedDay = allDays.find((d) => d.date === selectedDate);
 
   function handleBack() {
     if (step === "slot") setStep("date");
-    else if (step === "package") setStep("slot");
-    else if (step === "details") setStep("package");
-    else if (step === "confirm") setStep("details");
+    else if (step === "address") setStep("slot");
+    else if (step === "property") setStep("address");
+    else if (step === "pricing") setStep("property");
+    else if (step === "customer") setStep("pricing");
+    else if (step === "confirm") setStep("customer");
   }
 
   async function handleSubmit() {
-    if (!selectedDate || !selectedSlot || !selectedTier) return;
+    if (!selectedDate || !selectedSlot || !propertyInput || !pricingEvaluation)
+      return;
     setSubmitting(true);
     setError(null);
 
@@ -223,14 +323,19 @@ export function BookingWizard({
     const payload: CreateBookingPayload = {
       inspectionDate: selectedDate,
       slot: selectedSlot,
-      customerName: form.customerName,
-      customerEmail: form.customerEmail,
-      customerPhone: form.customerPhone,
-      propertyAddress: form.propertyAddress,
-      notes: form.notes || undefined,
-      agentName: form.agentName || undefined,
-      pricingTierLabel: selectedTier.sizeLabel,
-      price: selectedTier.price ?? undefined,
+      customerName: customer.customerName,
+      customerEmail: customer.customerEmail,
+      customerPhone: customer.customerPhone,
+      propertyAddress: formatFullPropertyAddress(address),
+      propertySuburb: address.suburb,
+      propertyCity: address.city,
+      floorAreaSqm: propertyInput.floorAreaSqm,
+      decadeBuilt: propertyInput.decadeBuilt,
+      propertyType: propertyInput.propertyType,
+      storeys: propertyInput.storeys,
+      estimatedPrice: pricingEvaluation.estimatedPrice,
+      reviewFlags: pricingEvaluation.reviewFlags,
+      notes: customer.notes || undefined,
     };
 
     try {
@@ -264,17 +369,18 @@ export function BookingWizard({
     return (
       <BookingSuccess
         mode={submitMode}
-        customerEmail={form.customerEmail}
+        customerEmail={customer.customerEmail}
         bookingId={bookingId}
         className={cardClass}
       />
     );
   }
 
-  const stepBodyClass =
-    step === "package"
-      ? `${BOOKING_STEP_BODY_CLASS} h-auto sm:h-[24.5rem]`
-      : `h-[24.5rem] ${BOOKING_STEP_BODY_CLASS}`;
+  const scrollableStep =
+    step === "property" || step === "confirm" || step === "customer";
+  const stepBodyClass = scrollableStep
+    ? `${BOOKING_STEP_BODY_CLASS} h-auto sm:h-[24.5rem]`
+    : `h-[24.5rem] ${BOOKING_STEP_BODY_CLASS}`;
 
   return (
     <Card className={cardClass}>
@@ -314,41 +420,57 @@ export function BookingWizard({
             selectedSlot={selectedSlot}
             onSelect={(s) => {
               setSelectedSlot(s);
-              setStep("package");
+              setStep("address");
             }}
           />
         )}
 
-        {step === "package" && (
-          <div className="flex h-full min-h-0 flex-col">
-            <PackagePicker
-              selectedTier={selectedTier}
-              onSelect={(tier) => {
-                setSelectedTier(tier);
-                setStep("details");
-              }}
-            />
-          </div>
+        {step === "address" && (
+          <PropertyAddressStep
+            values={address}
+            onChange={setAddress}
+            onContinue={() => setStep("property")}
+          />
         )}
 
-        {step === "details" && (
+        {step === "property" && (
+          <PropertyDetailsStep
+            values={propertyDetails}
+            onChange={setPropertyDetails}
+            onContinue={() => setStep("pricing")}
+          />
+        )}
+
+        {step === "pricing" && pricingEvaluation && (
+          <PricingDisplayStep
+            display={pricingEvaluation.customerDisplay}
+            onContinue={() => setStep("customer")}
+          />
+        )}
+
+        {step === "customer" && (
           <CustomerForm
-            values={form}
-            onChange={setForm}
+            values={customer}
+            onChange={setCustomer}
             onContinue={() => setStep("confirm")}
           />
         )}
 
-        {step === "confirm" && selectedDate && selectedSlot && selectedTier && (
-          <ConfirmStep
-            date={selectedDate}
-            slot={selectedSlot}
-            tier={selectedTier}
-            form={form}
-            onConfirm={handleSubmit}
-            submitting={submitting}
-          />
-        )}
+        {step === "confirm" &&
+          selectedDate &&
+          selectedSlot &&
+          propertyInput &&
+          pricingEvaluation && (
+            <ConfirmStep
+              date={selectedDate}
+              slot={selectedSlot}
+              property={propertyInput}
+              pricingDisplay={pricingEvaluation.customerDisplay}
+              customer={customer}
+              onConfirm={handleSubmit}
+              submitting={submitting}
+            />
+          )}
       </div>
     </Card>
   );

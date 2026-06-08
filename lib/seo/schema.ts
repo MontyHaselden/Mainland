@@ -1,5 +1,6 @@
 import {
   BUSINESS_EMAIL,
+  BUSINESS_LOGO_PATH,
   BUSINESS_NAME,
   BUSINESS_PHONE,
   INSPECTION_SERVICES,
@@ -40,6 +41,21 @@ function locationPlaces(location: Location) {
   }));
 }
 
+export function webSiteSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: BUSINESS_NAME,
+    url: SITE_URL,
+    publisher: {
+      "@type": "Organization",
+      name: BUSINESS_NAME,
+      url: SITE_URL,
+      logo: `${SITE_URL}${BUSINESS_LOGO_PATH}`,
+    },
+  };
+}
+
 export function localBusinessSchema() {
   return {
     "@context": "https://schema.org",
@@ -48,7 +64,8 @@ export function localBusinessSchema() {
     url: SITE_URL,
     telephone: BUSINESS_PHONE,
     email: BUSINESS_EMAIL,
-    image: `${SITE_URL}/hero-base.jpg`,
+    image: `${SITE_URL}${BUSINESS_LOGO_PATH}`,
+    logo: `${SITE_URL}${BUSINESS_LOGO_PATH}`,
     description:
       "Premium building inspections across Christchurch and Canterbury. Drone roof inspections, moisture testing, thermal imaging, and Spectora digital reports by a licensed builder with 25+ years experience.",
     areaServed: LOCATIONS.flatMap((location) => locationPlaces(location)),

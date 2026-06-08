@@ -2,16 +2,16 @@
 
 import { useState } from "react";
 import type { Booking, ContactMessage } from "@/lib/db/schema";
-import { NewBookingsPanel } from "./new-bookings-panel";
+import { PendingReviewPanel } from "./pending-review-panel";
 import { TodayPanel } from "./today-panel";
 import { UpcomingPanel } from "./upcoming-panel";
 import { CrmTable } from "./crm-table";
-import { BookingDetailModal } from "./booking-detail-modal";
+import { BookingAdminModal } from "./booking-admin-modal";
 import { ContactDetailModal } from "./contact-detail-modal";
 import { ContactMessagesPanel } from "./contact-messages-panel";
 
 type StaffDashboardClientProps = {
-  newBookings: Booking[];
+  pendingReview: Booking[];
   today: Booking[];
   upcoming: Booking[];
   all: Booking[];
@@ -21,7 +21,7 @@ type StaffDashboardClientProps = {
 };
 
 export function StaffDashboardClient({
-  newBookings,
+  pendingReview,
   today,
   upcoming,
   all,
@@ -44,9 +44,9 @@ export function StaffDashboardClient({
 
       <div className="mb-8 flex items-center gap-3">
         <h1 className="font-display text-3xl text-navy">Dashboard</h1>
-        {newBookings.length > 0 && (
+        {pendingReview.length > 0 && (
           <span className="rounded-full bg-amber-500 px-3 py-1 text-xs font-bold text-white">
-            {newBookings.length} new booking{newBookings.length === 1 ? "" : "s"}
+            {pendingReview.length} pending review
           </span>
         )}
         {newContactMessages.length > 0 && (
@@ -56,6 +56,19 @@ export function StaffDashboardClient({
           </span>
         )}
       </div>
+
+      <section className="mb-10 rounded-2xl border border-amber-200 bg-amber-50/50 p-6">
+        <h2 className="text-lg font-semibold text-navy">Pending review</h2>
+        <p className="mt-1 text-sm text-muted">
+          New booking requests awaiting price confirmation and admin review.
+        </p>
+        <div className="mt-6">
+          <PendingReviewPanel
+            bookings={pendingReview}
+            onSelectBooking={setSelectedBooking}
+          />
+        </div>
+      </section>
 
       <section className="mb-10 rounded-2xl border border-border bg-surface p-6">
         <h2 className="text-lg font-semibold text-navy">Contact messages</h2>
@@ -73,22 +86,6 @@ export function StaffDashboardClient({
       </section>
 
       <div className="grid gap-10 lg:grid-cols-2">
-        <section className="rounded-2xl border border-border bg-surface p-6">
-          <h2 className="text-lg font-semibold text-navy">
-            New bookings — confirm acknowledgment
-          </h2>
-          <p className="mt-1 text-sm text-muted">
-            Bookings are already confirmed for customers. Acknowledge to clear
-            the notification.
-          </p>
-          <div className="mt-6">
-            <NewBookingsPanel
-              bookings={newBookings}
-              onSelectBooking={setSelectedBooking}
-            />
-          </div>
-        </section>
-
         <section className="rounded-2xl border border-border bg-surface p-6">
           <h2 className="text-lg font-semibold text-navy">
             Today&apos;s inspections
@@ -132,7 +129,8 @@ export function StaffDashboardClient({
         </div>
       </section>
 
-      <BookingDetailModal
+      <BookingAdminModal
+        key={selectedBooking?.id ?? "none"}
         booking={selectedBooking}
         onClose={() => setSelectedBooking(null)}
       />

@@ -1,6 +1,6 @@
 import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
-import { and, gte, lte } from "drizzle-orm";
+import { and, gte, inArray, lte } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { bookings } from "@/lib/db/schema";
 import { getBlockedSlotsForRange, isSlotBlocked } from "./blocks";
@@ -10,6 +10,7 @@ import {
   type AvailabilityStatus,
   type BookingSlot,
 } from "./constants";
+import { SLOT_HOLDING_STATUSES } from "./status";
 import type { DayAvailability, MonthAvailabilityResponse } from "./types";
 
 export function getNzNow(): Date {
@@ -94,8 +95,9 @@ export async function getMonthAvailability(
     .where(
       and(
         gte(bookings.inspectionDate, startStr),
-        lte(bookings.inspectionDate, endStr)
-      )
+        lte(bookings.inspectionDate, endStr),
+        inArray(bookings.status, SLOT_HOLDING_STATUSES),
+      ),
     );
 
   const byDate = new Map<string, BookingSlot[]>();

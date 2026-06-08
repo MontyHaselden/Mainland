@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import type { Booking } from "@/lib/db/schema";
 import { SLOT_LABELS, type BookingSlot } from "@/lib/booking/constants";
 import { formatBookingDate } from "@/lib/booking/queries";
+import { BOOKING_STATUS_LABELS } from "@/lib/booking/status";
 export function CrmTable({
   bookings,
   onSelectBooking,
@@ -42,7 +43,7 @@ export function CrmTable({
               <th className="px-4 py-3">Slot</th>
               <th className="px-4 py-3">Customer</th>
               <th className="px-4 py-3">Address</th>
-              <th className="px-4 py-3">Ack</th>
+              <th className="px-4 py-3">Status</th>
             </tr>
           </thead>
           <tbody>
@@ -62,14 +63,10 @@ export function CrmTable({
                 <td className="max-w-[200px] truncate px-4 py-3 text-muted">
                   {b.propertyAddress}
                 </td>
-                <td className="px-4 py-3">
-                  {b.acknowledgedAt ? (
-                    <span className="text-xs text-muted">Done</span>
-                  ) : (
-                    <span className="text-xs font-medium text-amber-700">
-                      Pending
-                    </span>
-                  )}
+                <td className="px-4 py-3 text-xs">
+                  {BOOKING_STATUS_LABELS[
+                    b.status as keyof typeof BOOKING_STATUS_LABELS
+                  ] ?? b.status}
                 </td>
               </tr>
             ))}

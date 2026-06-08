@@ -20,17 +20,17 @@ export function BookingSuccess({
       <h2 className="font-display text-2xl text-navy">
         {mode === "preview" ? "Request received" : "You're booked"}
       </h2>
-      {mode === "preview" ? (
-        <p className="mt-3 text-muted">
-          Thanks — your booking request has been received. Mainland Building
-          Inspections will confirm your inspection shortly.
+      <p className="mt-3 text-muted">
+        Thanks — your booking request has been received. Mainland Building
+        Inspections will review the property details and confirm your
+        inspection shortly.
+      </p>
+      {mode === "live" && customerEmail ? (
+        <p className="mt-3 text-sm text-muted">
+          We&apos;ve sent a summary to {customerEmail}. We&apos;ll email you
+          again once your booking is confirmed.
         </p>
-      ) : (
-        <p className="mt-3 text-muted">
-          Your inspection is confirmed. A confirmation email has been sent to{" "}
-          {customerEmail}.
-        </p>
-      )}
+      ) : null}
       {mode === "live" && bookingId ? (
         <p className="mt-4 text-xs text-muted">Reference: {bookingId}</p>
       ) : null}

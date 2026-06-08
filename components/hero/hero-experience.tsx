@@ -139,8 +139,8 @@ export function HeroExperience() {
               >
                 <BookingWizard
                   variant="embedded"
-                  submitMode="preview"
-                  availabilitySource="mock"
+                  submitMode="live"
+                  availabilitySource="api"
                 />
               </div>
             </div>

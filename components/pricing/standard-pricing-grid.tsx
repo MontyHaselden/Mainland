@@ -1,5 +1,8 @@
 import Link from "next/link";
-import { STANDARD_PRICING_TIERS } from "@/lib/pricing/standard-inspections";
+import {
+  STANDARD_PRICING_INTRO,
+  STANDARD_PRICING_TIERS,
+} from "@/lib/pricing/standard-inspections";
 
 export function StandardPricingGrid() {
   return (
@@ -11,10 +14,7 @@ export function StandardPricingGrid() {
         >
           Pricing by floor area
         </h2>
-        <p className="mt-3 max-w-2xl text-muted">
-          Select the tier that matches your property size. Every standard
-          inspection includes the full scope listed above.
-        </p>
+        <p className="mt-3 max-w-2xl text-muted">{STANDARD_PRICING_INTRO}</p>
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {STANDARD_PRICING_TIERS.map((tier) => (
             <article

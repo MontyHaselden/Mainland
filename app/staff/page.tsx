@@ -2,8 +2,8 @@ import { redirect } from "next/navigation";
 import { getStaffSession } from "@/lib/auth/session";
 import {
   getAllBookings,
+  getPendingReviewBookings,
   getTodayBookings,
-  getUnacknowledgedBookings,
   getUpcomingBookings,
 } from "@/lib/booking/queries";
 import {
@@ -18,7 +18,7 @@ export default async function StaffDashboardPage() {
     redirect("/staff/login");
   }
 
-  let newBookings: Awaited<ReturnType<typeof getUnacknowledgedBookings>> = [];
+  let pendingReview: Awaited<ReturnType<typeof getPendingReviewBookings>> = [];
   let today: Awaited<ReturnType<typeof getTodayBookings>> = [];
   let upcoming: Awaited<ReturnType<typeof getUpcomingBookings>> = [];
   let all: Awaited<ReturnType<typeof getAllBookings>> = [];
@@ -29,9 +29,9 @@ export default async function StaffDashboardPage() {
   let dbError = false;
 
   try {
-    [newBookings, today, upcoming, all, newContactMessages, allContactMessages] =
+    [pendingReview, today, upcoming, all, newContactMessages, allContactMessages] =
       await Promise.all([
-        getUnacknowledgedBookings(),
+        getPendingReviewBookings(),
         getTodayBookings(),
         getUpcomingBookings(30),
         getAllBookings(),
@@ -45,7 +45,7 @@ export default async function StaffDashboardPage() {
   return (
     <div className="mx-auto max-w-7xl px-5 py-8 lg:px-8 lg:py-12">
       <StaffDashboardClient
-        newBookings={newBookings}
+        pendingReview={pendingReview}
         today={today}
         upcoming={upcoming}
         all={all}

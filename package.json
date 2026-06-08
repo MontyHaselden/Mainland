@@ -12,7 +12,8 @@
     "db:push": "drizzle-kit push",
     "staff:hash": "node scripts/staff-hash-password.mjs",
     "staff:seed": "node --env-file=.env.local scripts/staff-seed.mjs",
-    "staff:add": "node --env-file=.env.local scripts/staff-add.mjs"
+    "staff:add": "node --env-file=.env.local scripts/staff-add.mjs",
+    "email:test": "node --env-file=.env.local scripts/email-test-brevo.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

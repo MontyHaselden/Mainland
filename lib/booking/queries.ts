@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gte, isNull, lte } from "drizzle-orm";
+import { and, asc, desc, eq, gte, lte } from "drizzle-orm";
 import { addDays, format, parseISO } from "date-fns";
 import { getDb } from "@/lib/db";
 import { bookings, type Booking } from "@/lib/db/schema";
@@ -12,13 +12,17 @@ export async function getAllBookings(): Promise<Booking[]> {
     .orderBy(asc(bookings.inspectionDate), asc(bookings.slot));
 }
 
-export async function getUnacknowledgedBookings(): Promise<Booking[]> {
+export async function getPendingReviewBookings(): Promise<Booking[]> {
   const db = getDb();
   return db
     .select()
     .from(bookings)
-    .where(isNull(bookings.acknowledgedAt))
+    .where(eq(bookings.status, "pending_review"))
     .orderBy(desc(bookings.createdAt));
+}
+
+export async function getUnacknowledgedBookings(): Promise<Booking[]> {
+  return getPendingReviewBookings();
 }
 
 export async function getTodayBookings(): Promise<Booking[]> {

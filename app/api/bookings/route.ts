@@ -14,7 +14,14 @@ import {
   isSlotAvailable,
 } from "@/lib/booking/availability";
 import {
-  sendCustomerConfirmation,
+  DECADES_BUILT,
+  PROPERTY_TYPES,
+  STOREY_OPTIONS,
+} from "@/lib/booking/property-options";
+import { evaluatePricing } from "@/lib/booking/pricing-engine";
+import { getPricingRulesConfig } from "@/lib/booking/pricing-rules-queries";
+import {
+  sendCustomerBookingRequestReceived,
   sendStaffNewBookingAlert,
 } from "@/lib/email/brevo";
 
@@ -25,8 +32,15 @@ const bodySchema = z.object({
   customerEmail: z.string().email(),
   customerPhone: z.string().min(6).max(50),
   propertyAddress: z.string().min(5),
+  propertySuburb: z.string().min(2).max(255),
+  propertyCity: z.string().min(2).max(255),
+  floorAreaSqm: z.number().int().positive().max(2000).nullable(),
+  decadeBuilt: z.enum(DECADES_BUILT),
+  propertyType: z.enum(PROPERTY_TYPES),
+  storeys: z.enum(STOREY_OPTIONS),
+  estimatedPrice: z.number().int().positive().nullable().optional(),
+  reviewFlags: z.array(z.string()).optional(),
   notes: z.string().optional(),
-  agentName: z.string().optional(),
 });
 
 export async function POST(request: Request) {
@@ -36,23 +50,24 @@ export async function POST(request: Request) {
     if (!parsed.success) {
       return NextResponse.json(
         { error: "Invalid booking details" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const { inspectionDate, slot, ...customer } = parsed.data;
+    const { inspectionDate, slot, reviewFlags, estimatedPrice, ...fields } =
+      parsed.data;
 
     if (!isBookableWeekday(inspectionDate)) {
       return NextResponse.json(
         { error: "Inspections are available Monday to Saturday only." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (isPastDate(inspectionDate)) {
       return NextResponse.json(
         { error: "Cannot book a date in the past." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -62,9 +77,20 @@ export async function POST(request: Request) {
     if (!day || !isSlotAvailable(day, slot as BookingSlot)) {
       return NextResponse.json(
         { error: "That slot is no longer available. Please choose another." },
-        { status: 409 }
+        { status: 409 },
       );
     }
+
+    const rules = await getPricingRulesConfig();
+    const evaluation = evaluatePricing(
+      {
+        floorAreaSqm: fields.floorAreaSqm,
+        decadeBuilt: fields.decadeBuilt,
+        propertyType: fields.propertyType,
+        storeys: fields.storeys,
+      },
+      rules,
+    );
 
     const db = getDb();
     let booking;
@@ -74,8 +100,13 @@ export async function POST(request: Request) {
         .values({
           inspectionDate,
           slot,
-          status: "confirmed",
-          ...customer,
+          status: "pending_review",
+          ...fields,
+          estimatedPrice: estimatedPrice ?? evaluation.estimatedPrice,
+          reviewFlags: JSON.stringify(
+            reviewFlags ?? evaluation.reviewFlags,
+          ),
+          notes: fields.notes ?? null,
         })
         .returning();
     } catch (err: unknown) {
@@ -83,30 +114,32 @@ export async function POST(request: Request) {
       if (message.includes("unique") || message.includes("duplicate")) {
         return NextResponse.json(
           { error: "That slot was just booked. Please choose another." },
-          { status: 409 }
+          { status: 409 },
         );
       }
       throw err;
     }
 
-    const emailResults = await Promise.all([
-      sendCustomerConfirmation(booking),
+    const [staffEmailResult, customerEmailResult] = await Promise.all([
       sendStaffNewBookingAlert(booking),
+      sendCustomerBookingRequestReceived(booking),
     ]);
 
-    const emailWarnings = emailResults
-      .filter((r) => !r.ok)
-      .map((r) => (!r.ok ? r.error : ""));
+    const emailWarnings = [
+      !staffEmailResult.ok ? staffEmailResult.error : null,
+      !customerEmailResult.ok ? customerEmailResult.error : null,
+    ].filter(Boolean);
 
     return NextResponse.json({
       booking,
-      emailWarnings: emailWarnings.length ? emailWarnings : undefined,
+      emailWarning:
+        emailWarnings.length > 0 ? emailWarnings.join("; ") : undefined,
     });
   } catch (error) {
     console.error("Booking error:", error);
     return NextResponse.json(
       { error: "Unable to create booking" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -128,7 +161,7 @@ export async function GET() {
     console.error("List bookings error:", error);
     return NextResponse.json(
       { error: "Unable to load bookings" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -5,7 +5,7 @@ import {
   endOfMonth,
   eachDayOfInterval,
 } from "date-fns";
-import { and, asc, eq, gte, lte } from "drizzle-orm";
+import { and, asc, eq, gte, inArray, lte } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { bookings } from "@/lib/db/schema";
 import { getBlockedSlotsForRange, isSlotBlocked } from "./blocks";
@@ -14,6 +14,7 @@ import {
   type AvailabilityStatus,
   type BookingSlot,
 } from "./constants";
+import { SLOT_HOLDING_STATUSES } from "./status";
 import type {
   StaffCalendarDayDetail,
   StaffCalendarDaySummary,
@@ -71,8 +72,9 @@ export async function getStaffCalendarMonth(
       .where(
         and(
           gte(bookings.inspectionDate, startStr),
-          lte(bookings.inspectionDate, endStr)
-        )
+          lte(bookings.inspectionDate, endStr),
+          inArray(bookings.status, SLOT_HOLDING_STATUSES),
+        ),
       ),
     getBlockedSlotsForRange(startStr, endStr),
   ]);
@@ -105,7 +107,12 @@ export async function getStaffCalendarDay(
     db
       .select()
       .from(bookings)
-      .where(eq(bookings.inspectionDate, date))
+      .where(
+        and(
+          eq(bookings.inspectionDate, date),
+          inArray(bookings.status, SLOT_HOLDING_STATUSES),
+        ),
+      )
       .orderBy(asc(bookings.slot)),
     getBlockedSlotsForRange(date, date),
   ]);
