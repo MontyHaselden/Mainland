@@ -19,6 +19,11 @@ export const SAMPLE_REPORT_PATH = "/sample-report";
 export const GOOGLE_BUSINESS_PROFILE_URL =
   "https://share.google/8xIwFcTFL6WTnrs9s";
 
+export const GOOGLE_REVIEWS_URL =
+  "https://share.google/PhiiX6nztAHe49HZM";
+
+export const INSPECTION_FROM_PRICE = 499;
+
 export const INSPECTION_SERVICES = [
   "Pre-purchase building inspections",
   "Pre-sale building inspections",

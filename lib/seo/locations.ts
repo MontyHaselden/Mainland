@@ -1,9 +1,9 @@
 import {
   defaultLocationH1,
   defaultLocationH2,
-  excerptSeoBody,
   FEATURED_LOCATION_CONTENT,
   isFeaturedLocationSlug,
+  standardIntroParagraph,
 } from "./featured-locations";
 import { LOCATION_POSTCODES } from "./location-postcodes";
 
@@ -21,6 +21,8 @@ export type Location = {
   featured?: boolean;
   intro: string;
   trustContext: string;
+  introParagraph?: string;
+  metaDescription?: string;
   seoBodyParagraphs?: string[];
   seoBodyCta?: string;
   nearbySlugs: string[];
@@ -43,12 +45,12 @@ const LOCATION_ENTRIES: Omit<Location, "postcodes" | "h1" | "h2">[] = [
     trustContext:
       "Christchurch buyers need inspectors who read repair history, cladding risk, and roof condition with real building experience — not generic checklists. Mainland delivers drone roof surveys, moisture testing, thermal imaging, and Spectora reports from a licensed builder with 25+ years on site.",
     nearbySlugs: [
-      slug("christchurch-cbd"),
       slug("riccarton"),
       slug("hornby"),
       slug("halswell"),
       slug("papanui"),
       slug("merivale"),
+      slug("fendalton"),
     ],
   },
   {
@@ -76,9 +78,10 @@ const LOCATION_ENTRIES: Omit<Location, "postcodes" | "h1" | "h2">[] = [
       "Whether you are purchasing near Riccarton Road or preparing a pre-sale inspection closer to Ilam, we document roof condition, subfloor moisture, cladding risks, and interior defects with the precision serious buyers expect. Every Riccarton report is delivered through Spectora with clear photographs and prioritised findings.",
     nearbySlugs: [
       slug("christchurch"),
-      slug("christchurch-cbd"),
-      slug("ilam"),
-      slug("bryndwr"),
+      slug("hornby"),
+      slug("papanui"),
+      slug("fendalton"),
+      slug("merivale"),
     ],
   },
   {
@@ -92,7 +95,7 @@ const LOCATION_ENTRIES: Omit<Location, "postcodes" | "h1" | "h2">[] = [
     nearbySlugs: [
       slug("halswell"),
       slug("templeton"),
-      slug("sockburn"),
+      slug("riccarton"),
       slug("rolleston"),
     ],
   },
@@ -105,10 +108,10 @@ const LOCATION_ENTRIES: Omit<Location, "postcodes" | "h1" | "h2">[] = [
     trustContext:
       "North Christchurch buyers value independent, builder-qualified assessments — not tick-box reports. We inspect roofs, wet areas, subfloors, and exterior cladding thoroughly, then deliver a digital Spectora report you can share with your lawyer, lender, or agent with confidence.",
     nearbySlugs: [
-      slug("st-albans"),
-      slug("bishopdale"),
-      slug("shirley"),
-      slug("bryndwr"),
+      slug("christchurch"),
+      slug("burnside"),
+      slug("merivale"),
+      slug("fendalton"),
     ],
   },
   {
@@ -121,9 +124,9 @@ const LOCATION_ENTRIES: Omit<Location, "postcodes" | "h1" | "h2">[] = [
       "We understand what Merivale purchasers expect: thorough documentation, clear prioritisation, and a professional report that reflects the standard of the property. Thermal imaging, moisture testing, drone roof checks, and 25+ years of builder experience come standard — not as upsells.",
     nearbySlugs: [
       slug("fendalton"),
-      slug("st-albans"),
-      slug("christchurch"),
       slug("papanui"),
+      slug("christchurch"),
+      slug("burnside"),
     ],
   },
   {
@@ -136,9 +139,9 @@ const LOCATION_ENTRIES: Omit<Location, "postcodes" | "h1" | "h2">[] = [
       "Fendalton buyers routinely commission pre-purchase inspections before auction or deadline sale. Mainland delivers independent builder-led assessments with Spectora reporting, drone roof imagery where appropriate, and plain-language summaries that support confident negotiation.",
     nearbySlugs: [
       slug("merivale"),
-      slug("ilam"),
       slug("burnside"),
       slug("papanui"),
+      slug("riccarton"),
     ],
   },
   {
@@ -182,8 +185,8 @@ const LOCATION_ENTRIES: Omit<Location, "postcodes" | "h1" | "h2">[] = [
     nearbySlugs: [
       slug("fendalton"),
       slug("papanui"),
-      slug("bishopdale"),
-      slug("avonhead"),
+      slug("merivale"),
+      slug("christchurch"),
     ],
   },
   {
@@ -345,10 +348,9 @@ const LOCATION_ENTRIES: Omit<Location, "postcodes" | "h1" | "h2">[] = [
     trustContext:
       "Sumner properties command premium prices — and premium inspections should match. We combine builder expertise, drone roof surveys, thermal imaging, and Spectora digital reports so coastal exposure and structural observations are documented properly.",
     nearbySlugs: [
-      slug("redcliffs"),
-      slug("ferrymead"),
       slug("lyttelton"),
-      slug("woolston"),
+      slug("new-brighton"),
+      slug("christchurch"),
     ],
   },
   {
@@ -375,10 +377,10 @@ const LOCATION_ENTRIES: Omit<Location, "postcodes" | "h1" | "h2">[] = [
     trustContext:
       "East Christchurch buyers in New Brighton choose Mainland for independent, builder-qualified inspections with modern technology and premium reporting. Moisture testing, thermal imaging, and Spectora delivery are standard inclusions.",
     nearbySlugs: [
-      slug("shirley"),
-      slug("linwood"),
-      slug("woolston"),
+      slug("sumner"),
       slug("pegasus"),
+      slug("woodend"),
+      slug("christchurch"),
     ],
   },
   {
@@ -510,10 +512,10 @@ const LOCATION_ENTRIES: Omit<Location, "postcodes" | "h1" | "h2">[] = [
     trustContext:
       "Selwyn purchasers in Rolleston rely on Mainland for staging inspections, pre-purchase reports, and thorough builder-led assessments. Drone roof inspection, moisture testing, thermal imaging, and Spectora reporting come together in a premium service designed for growing communities.",
     nearbySlugs: [
-      slug("prebbleton"),
       slug("lincoln"),
+      slug("prebbleton"),
       slug("templeton"),
-      slug("hornby"),
+      slug("halswell"),
     ],
   },
   {
@@ -572,8 +574,7 @@ const LOCATION_ENTRIES: Omit<Location, "postcodes" | "h1" | "h2">[] = [
     nearbySlugs: [
       slug("kaiapoi"),
       slug("woodend"),
-      slug("oxford"),
-      slug("amberley"),
+      slug("pegasus"),
     ],
   },
   {
@@ -588,7 +589,6 @@ const LOCATION_ENTRIES: Omit<Location, "postcodes" | "h1" | "h2">[] = [
       slug("rangiora"),
       slug("woodend"),
       slug("pegasus"),
-      slug("oxford"),
     ],
   },
   {
@@ -601,7 +601,6 @@ const LOCATION_ENTRIES: Omit<Location, "postcodes" | "h1" | "h2">[] = [
       "Woodend buyers trust Mainland for thorough, technology-supported inspections and premium Spectora reporting. Drone roof checks and moisture testing integrate seamlessly into our builder-led process.",
     nearbySlugs: [
       slug("kaiapoi"),
-      slug("pegasus"),
       slug("rangiora"),
       slug("new-brighton"),
     ],
@@ -705,10 +704,9 @@ const LOCATION_ENTRIES: Omit<Location, "postcodes" | "h1" | "h2">[] = [
     trustContext:
       "Lyttelton properties demand careful roof, cladding, and drainage assessment. Mainland provides builder-qualified inspections with thermal imaging, moisture testing, drone roof surveys, and detailed Spectora reports — insured and independently prepared.",
     nearbySlugs: [
-      slug("redcliffs"),
       slug("sumner"),
       slug("christchurch"),
-      slug("akaroa"),
+      slug("new-brighton"),
     ],
   },
   {
@@ -738,6 +736,8 @@ function resolveLocationFields(
   | "featured"
   | "intro"
   | "trustContext"
+  | "introParagraph"
+  | "metaDescription"
   | "seoBodyParagraphs"
   | "seoBodyCta"
 > {
@@ -746,7 +746,9 @@ function resolveLocationFields(
     return {
       h1: featured.h1,
       h2: featured.h2,
-      intro: excerptSeoBody(featured),
+      intro: featured.introParagraph,
+      introParagraph: featured.introParagraph,
+      metaDescription: featured.metaDescription,
       trustContext: featured.seoBodyParagraphs[1] ?? "",
       seoBodyParagraphs: featured.seoBodyParagraphs,
       seoBodyCta: featured.seoBodyCta,
@@ -757,6 +759,10 @@ function resolveLocationFields(
     h1: defaultLocationH1(entry.name),
     h2: defaultLocationH2(entry.name),
     intro: entry.intro,
+    introParagraph: standardIntroParagraph(
+      entry.name,
+      entry.region === "christchurch" ? "Christchurch" : "Canterbury",
+    ),
     trustContext: entry.trustContext,
   };
 }

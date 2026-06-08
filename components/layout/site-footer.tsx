@@ -30,6 +30,11 @@ export function SiteFooter() {
           </p>
           <ul className="mt-4 space-y-2 text-sm">
             <li>
+              <Link href="/pricing" className="text-white/80 hover:text-white">
+                Pricing
+              </Link>
+            </li>
+            <li>
               <Link href="/book" className="text-white/80 hover:text-white">
                 Book an inspection
               </Link>

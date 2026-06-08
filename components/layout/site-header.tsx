@@ -17,6 +17,9 @@ export function SiteHeader() {
           </span>
         </Link>
         <nav className="hidden items-center gap-8 text-sm font-medium text-muted md:flex">
+          <Link href="/pricing" className="hover:text-navy">
+            Pricing
+          </Link>
           <Link href="/services" className="hover:text-navy">
             Services
           </Link>

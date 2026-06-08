@@ -8,6 +8,7 @@ export function ServiceAreasLayoutGate() {
   const pathname = usePathname();
 
   if (
+    pathname === "/" ||
     pathname === "/service-areas" ||
     pathname.startsWith(`/${LOCATION_SLUG_PREFIX}`)
   ) {

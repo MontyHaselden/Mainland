@@ -1,13 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BookingWizard } from "@/components/booking/booking-wizard";
-import type { MonthAvailabilityResponse } from "@/lib/booking/types";
+import { ScrollToBookingLink } from "@/components/home/scroll-to-booking-link";
+import { SAMPLE_REPORT_PATH } from "@/lib/seo/business";
 import { HeroBackground } from "./hero-background";
-
-type HeroExperienceProps = {
-  bookingInitial: MonthAvailabilityResponse | null;
-};
 
 function easeInOutCubic(progress: number): number {
   return progress < 0.5
@@ -47,7 +45,7 @@ function titleOpacityFromTransition(transition: number): number {
   return 1 - (transition - 0.75) / 0.25;
 }
 
-export function HeroExperience({ bookingInitial }: HeroExperienceProps) {
+export function HeroExperience() {
   const pinRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
 
@@ -103,16 +101,30 @@ export function HeroExperience({ bookingInitial }: HeroExperienceProps) {
                 }}
               >
                 <div className="hero-title-panel w-full rounded-2xl border border-white/10 bg-navy-deep/55 px-6 py-5 backdrop-blur-md sm:px-7 sm:py-6">
-                  <p className="text-sm font-semibold uppercase tracking-widest text-white/80">
-                    Canterbury &amp; South Island
-                  </p>
-                  <h1 className="font-display mt-3 text-4xl leading-tight text-white sm:text-5xl lg:text-6xl">
-                    Building inspections you can trust
+                  <h1 className="font-display text-4xl leading-tight text-white sm:text-5xl lg:text-6xl">
+                    Canterbury Building Inspections
                   </h1>
-                  <p className="mt-4 max-w-md text-base text-white/90 lg:text-lg">
-                    Clear, thorough reports from licensed inspectors. Book your
-                    morning or afternoon slot in minutes.
+                  <h2 className="font-display mt-3 text-xl text-white/95 sm:text-2xl">
+                    Premium Interactive Reporting
+                  </h2>
+                  <p className="mt-4 max-w-lg text-base text-white/90 lg:text-lg">
+                    See exactly what you&apos;re buying before you commit. Our
+                    Premium Interactive Reports combine photographs, drone roof
+                    inspections, thermal imaging observations, moisture testing,
+                    maintenance recommendations and easy-to-understand defect
+                    summaries.
                   </p>
+                  <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                    <Link
+                      href={SAMPLE_REPORT_PATH}
+                      className="inline-flex min-h-12 items-center justify-center rounded-lg bg-accent px-6 font-semibold text-white transition-colors hover:bg-accent-light"
+                    >
+                      View Sample Report
+                    </Link>
+                    <ScrollToBookingLink className="inline-flex min-h-12 items-center justify-center rounded-lg border border-white/25 px-6 font-semibold text-white transition-colors hover:bg-white/10">
+                      Check Dates &amp; Pricing
+                    </ScrollToBookingLink>
+                  </div>
                 </div>
               </div>
 
@@ -126,9 +138,9 @@ export function HeroExperience({ bookingInitial }: HeroExperienceProps) {
                 }}
               >
                 <BookingWizard
-                  embedded
-                  initialMonth={bookingInitial?.month}
-                  initialDays={bookingInitial?.days}
+                  variant="embedded"
+                  submitMode="preview"
+                  availabilitySource="mock"
                 />
               </div>
             </div>

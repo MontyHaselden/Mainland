@@ -15,10 +15,10 @@ export function LogoMark({
     <img
       src={LOGO_SRC}
       alt={title}
-      className={`object-contain ${className}`}
+      className={`block shrink-0 object-cover ${className}`}
       draggable={false}
-      width={160}
-      height={160}
+      width={80}
+      height={80}
     />
   );
 }

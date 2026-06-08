@@ -114,7 +114,7 @@ export function locationFaqSchema(location: Location) {
     mainEntity: [
       {
         "@type": "Question",
-        name: `Do you offer pre-purchase inspections in ${name}?`,
+        name: `Do you offer pre-purchase building inspections in ${name}?`,
         acceptedAnswer: {
           "@type": "Answer",
           text: `Yes. Mainland Building Inspections provides comprehensive pre-purchase building inspections throughout ${name}, including roof assessment, moisture testing, thermal imaging where appropriate, and a detailed Spectora digital report.`,
@@ -122,7 +122,7 @@ export function locationFaqSchema(location: Location) {
       },
       {
         "@type": "Question",
-        name: `Do you inspect roofs with a drone in ${name}?`,
+        name: "Can you inspect the roof with a drone?",
         acceptedAnswer: {
           "@type": "Answer",
           text: `Yes. Where safe and appropriate, we use drone roof inspection to document areas that are difficult to access from ground level. This is included as part of our premium inspection service in ${name}.`,
@@ -130,7 +130,7 @@ export function locationFaqSchema(location: Location) {
       },
       {
         "@type": "Question",
-        name: `Do you check for moisture in ${name} properties?`,
+        name: "Do you check moisture-prone areas?",
         acceptedAnswer: {
           "@type": "Answer",
           text: `Yes. Moisture testing is a core part of our inspections. We use moisture metres and thermal imaging to identify damp areas in bathrooms, kitchens, subfloors, and cladding systems.`,
@@ -138,7 +138,7 @@ export function locationFaqSchema(location: Location) {
       },
       {
         "@type": "Question",
-        name: "How quickly do I receive the report?",
+        name: "How quickly will I receive my report?",
         acceptedAnswer: {
           "@type": "Answer",
           text: "Reports are delivered digitally through Spectora, typically within 24 hours of the inspection. A verbal overview can be arranged on the day where required.",
@@ -154,7 +154,7 @@ export function locationFaqSchema(location: Location) {
       },
       {
         "@type": "Question",
-        name: `Do you service suburbs near ${name}?`,
+        name: "Do you service nearby suburbs?",
         acceptedAnswer: {
           "@type": "Answer",
           text: `Yes. We cover ${name} and surrounding suburbs and towns across Christchurch and Canterbury. Nearby areas are listed on this page, and you can view our full service area map online.`,

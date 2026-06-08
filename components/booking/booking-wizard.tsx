@@ -1,34 +1,67 @@
 "use client";
 
-import { useCallback, useState } from "react";
-import { format } from "date-fns";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { addMonths, format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
+  createAvailabilityLoader,
+  type AvailabilitySource,
+} from "@/lib/booking/availability-source";
+import {
   NZ_TIMEZONE,
   type BookingSlot,
 } from "@/lib/booking/constants";
+import { INSPECTION_FROM_PRICE } from "@/lib/seo/business";
+import type { StandardPricingTier } from "@/lib/pricing/standard-inspections";
 import type {
   CreateBookingPayload,
   DayAvailability,
-  MonthAvailabilityResponse,
 } from "@/lib/booking/types";
-import { DateCalendar } from "./date-calendar";
-import { SlotPicker } from "./slot-picker";
-import { CustomerForm } from "./customer-form";
+import { BookingSuccess } from "./booking-success";
 import { ConfirmStep } from "./confirm-step";
+import { CustomerForm } from "./customer-form";
+import { DateCalendar } from "./date-calendar";
+import { PackagePicker } from "./package-picker";
+import { SlotPicker } from "./slot-picker";
 
-type Step = "date" | "slot" | "details" | "confirm" | "success";
+type Step = "date" | "slot" | "package" | "details" | "confirm" | "success";
 
-/** Fixed body height — all steps match the calendar step */
-export const BOOKING_STEP_BODY_CLASS = "h-[24.5rem]";
+export type BookingWizardVariant = "homepage" | "page" | "embedded";
+export type BookingSubmitMode = "preview" | "live";
+
+/** Fixed body height — calendar and most steps; package scrolls on small screens */
+export const BOOKING_STEP_BODY_CLASS = "min-h-[24.5rem]";
+
+const STEPS: { id: Step; label: string }[] = [
+  { id: "date", label: "Date" },
+  { id: "slot", label: "Time" },
+  { id: "package", label: "Package" },
+  { id: "details", label: "Details" },
+  { id: "confirm", label: "Confirm" },
+];
 
 function getNzMonth(): string {
   return format(toZonedTime(new Date(), NZ_TIMEZONE), "yyyy-MM");
 }
 
+function getNzNextMonth(month: string): string {
+  return format(
+    addMonths(toZonedTime(parseMonth(month), NZ_TIMEZONE), 1),
+    "yyyy-MM",
+  );
+}
+
+function parseMonth(month: string): Date {
+  return new Date(`${month}-01T12:00:00`);
+}
+
 type BookingWizardProps = {
+  variant?: BookingWizardVariant;
+  submitMode?: BookingSubmitMode;
+  availabilitySource?: AvailabilitySource;
+  /** @deprecated Use availabilitySource instead */
   embedded?: boolean;
   initialMonth?: string;
   initialDays?: DayAvailability[];
@@ -37,15 +70,28 @@ type BookingWizardProps = {
 function WizardHeader({
   showBack,
   onBack,
+  variant,
 }: {
   showBack: boolean;
   onBack: () => void;
+  variant: BookingWizardVariant;
 }) {
   return (
     <div className="flex items-center justify-between gap-3">
-      <h2 className="font-display text-xl text-navy sm:text-2xl">
-        Book an inspection
-      </h2>
+      <div>
+        <h2 className="font-display text-xl text-navy sm:text-2xl">
+          Book an inspection
+        </h2>
+        {variant === "embedded" ? (
+          <p className="mt-0.5 text-sm text-muted">
+            Pre-purchase inspection · From ${INSPECTION_FROM_PRICE}
+          </p>
+        ) : variant === "homepage" ? (
+          <p className="mt-0.5 text-sm text-muted">
+            Select a date, time and package to request your inspection
+          </p>
+        ) : null}
+      </div>
       {showBack ? (
         <Button
           type="button"
@@ -62,19 +108,58 @@ function WizardHeader({
   );
 }
 
+function StepIndicator({ step }: { step: Step }) {
+  const activeIndex = STEPS.findIndex((s) => s.id === step);
+
+  return (
+    <ol className="mt-4 flex gap-1 overflow-x-auto pb-1">
+      {STEPS.map((s, index) => {
+        const isActive = s.id === step;
+        const isComplete = index < activeIndex;
+        return (
+          <li
+            key={s.id}
+            className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${
+              isActive
+                ? "bg-accent text-white"
+                : isComplete
+                  ? "bg-accent/10 text-accent"
+                  : "bg-border/40 text-muted"
+            }`}
+          >
+            {s.label}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
 export function BookingWizard({
+  variant: variantProp,
+  submitMode = "live",
+  availabilitySource = "api",
   embedded = false,
   initialMonth,
   initialDays,
 }: BookingWizardProps) {
+  const variant: BookingWizardVariant =
+    variantProp ?? (embedded ? "embedded" : "page");
+
+  const currentMonth = initialMonth ?? getNzMonth();
+  const nextMonth = getNzNextMonth(currentMonth);
+
   const [step, setStep] = useState<Step>("date");
-  const [month, setMonth] = useState(initialMonth ?? getNzMonth());
-  const [availability, setAvailability] = useState<DayAvailability[]>(
-    initialDays ?? []
+  const [currentDays, setCurrentDays] = useState<DayAvailability[]>(
+    initialDays ?? [],
   );
-  const [loadingMonth, setLoadingMonth] = useState(false);
+  const [nextDays, setNextDays] = useState<DayAvailability[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<BookingSlot | null>(null);
+  const [selectedTier, setSelectedTier] = useState<StandardPricingTier | null>(
+    null,
+  );
   const [form, setForm] = useState({
     customerName: "",
     customerEmail: "",
@@ -87,38 +172,54 @@ export function BookingWizard({
   const [error, setError] = useState<string | null>(null);
   const [bookingId, setBookingId] = useState<string | null>(null);
 
-  const loadMonth = useCallback(async (m: string) => {
+  const loadAvailability = useCallback(async () => {
     setError(null);
+    setLoading(true);
     try {
-      const res = await fetch(`/api/availability?month=${m}`);
-      if (!res.ok) throw new Error("Could not load availability");
-      const data: MonthAvailabilityResponse = await res.json();
-      setAvailability(data.days);
+      const loader = createAvailabilityLoader(availabilitySource);
+      const [current, next] = await Promise.all([
+        loader(currentMonth),
+        loader(nextMonth),
+      ]);
+      setCurrentDays(current);
+      setNextDays(next);
     } catch {
       setError("Unable to load calendar. Please try again.");
     } finally {
-      setLoadingMonth(false);
+      setLoading(false);
     }
-  }, []);
+  }, [availabilitySource, currentMonth, nextMonth]);
 
-  function handleMonthChange(m: string) {
-    setMonth(m);
-    setLoadingMonth(true);
-    void loadMonth(m);
-  }
+  useEffect(() => {
+    void loadAvailability();
+  }, [loadAvailability]);
+
+  const allDays = useMemo(
+    () => [...currentDays, ...nextDays],
+    [currentDays, nextDays],
+  );
+
+  const selectedDay = allDays.find((d) => d.date === selectedDate);
 
   function handleBack() {
     if (step === "slot") setStep("date");
-    else if (step === "details") setStep("slot");
+    else if (step === "package") setStep("slot");
+    else if (step === "details") setStep("package");
     else if (step === "confirm") setStep("details");
   }
 
-  const selectedDay = availability.find((d) => d.date === selectedDate);
-
   async function handleSubmit() {
-    if (!selectedDate || !selectedSlot) return;
+    if (!selectedDate || !selectedSlot || !selectedTier) return;
     setSubmitting(true);
     setError(null);
+
+    if (submitMode === "preview") {
+      await new Promise((r) => setTimeout(r, 400));
+      setStep("success");
+      setSubmitting(false);
+      return;
+    }
+
     const payload: CreateBookingPayload = {
       inspectionDate: selectedDate,
       slot: selectedSlot,
@@ -128,7 +229,10 @@ export function BookingWizard({
       propertyAddress: form.propertyAddress,
       notes: form.notes || undefined,
       agentName: form.agentName || undefined,
+      pricingTierLabel: selectedTier.sizeLabel,
+      price: selectedTier.price ?? undefined,
     };
+
     try {
       const res = await fetch("/api/bookings", {
         method: "POST",
@@ -149,28 +253,37 @@ export function BookingWizard({
     }
   }
 
-  const cardClass = embedded
-    ? "w-full border-white/20 bg-surface shadow-2xl shadow-navy/15 backdrop-blur-none"
-    : "mx-auto w-full max-w-2xl";
+  const cardClass =
+    variant === "embedded"
+      ? "w-full border-white/20 bg-surface shadow-2xl shadow-navy/15 backdrop-blur-none"
+      : variant === "homepage"
+        ? "w-full border-border bg-surface shadow-lg shadow-navy/5"
+        : "mx-auto w-full max-w-2xl";
 
   if (step === "success") {
     return (
-      <Card className={cardClass}>
-        <h2 className="font-display text-2xl text-navy">You&apos;re booked</h2>
-        <p className="mt-2 text-muted">
-          Your inspection is confirmed. A confirmation email has been sent to{" "}
-          {form.customerEmail}.
-        </p>
-        {bookingId && (
-          <p className="mt-4 text-xs text-muted">Reference: {bookingId}</p>
-        )}
-      </Card>
+      <BookingSuccess
+        mode={submitMode}
+        customerEmail={form.customerEmail}
+        bookingId={bookingId}
+        className={cardClass}
+      />
     );
   }
 
+  const stepBodyClass =
+    step === "package"
+      ? `${BOOKING_STEP_BODY_CLASS} h-auto sm:h-[24.5rem]`
+      : `h-[24.5rem] ${BOOKING_STEP_BODY_CLASS}`;
+
   return (
     <Card className={cardClass}>
-      <WizardHeader showBack={step !== "date"} onBack={handleBack} />
+      <WizardHeader
+        showBack={step !== "date"}
+        onBack={handleBack}
+        variant={variant}
+      />
+      <StepIndicator step={step} />
 
       {error && (
         <p className="mt-3 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">
@@ -178,30 +291,15 @@ export function BookingWizard({
         </p>
       )}
 
-      <div className={`mt-4 w-full ${BOOKING_STEP_BODY_CLASS}`}>
-        {step === "date" && availability.length === 0 && !loadingMonth && (
-          <div className="flex h-full items-center justify-center">
-            <Button
-              type="button"
-              variant="secondary"
-              className="w-full max-w-xs"
-              onClick={() => {
-                setLoadingMonth(true);
-                void loadMonth(month);
-              }}
-            >
-              Load availability
-            </Button>
-          </div>
-        )}
-
-        {step === "date" && (availability.length > 0 || loadingMonth) && (
+      <div className={`mt-4 w-full ${stepBodyClass}`}>
+        {step === "date" && (
           <DateCalendar
-            month={month}
-            days={availability}
-            loading={loadingMonth}
+            currentMonth={currentMonth}
+            nextMonth={nextMonth}
+            currentDays={currentDays}
+            nextDays={nextDays}
+            loading={loading}
             selectedDate={selectedDate}
-            onMonthChange={handleMonthChange}
             onSelectDate={(d) => {
               setSelectedDate(d);
               setSelectedSlot(null);
@@ -216,9 +314,21 @@ export function BookingWizard({
             selectedSlot={selectedSlot}
             onSelect={(s) => {
               setSelectedSlot(s);
-              setStep("details");
+              setStep("package");
             }}
           />
+        )}
+
+        {step === "package" && (
+          <div className="flex h-full min-h-0 flex-col">
+            <PackagePicker
+              selectedTier={selectedTier}
+              onSelect={(tier) => {
+                setSelectedTier(tier);
+                setStep("details");
+              }}
+            />
+          </div>
         )}
 
         {step === "details" && (
@@ -229,10 +339,11 @@ export function BookingWizard({
           />
         )}
 
-        {step === "confirm" && selectedDate && selectedSlot && (
+        {step === "confirm" && selectedDate && selectedSlot && selectedTier && (
           <ConfirmStep
             date={selectedDate}
             slot={selectedSlot}
+            tier={selectedTier}
             form={form}
             onConfirm={handleSubmit}
             submitting={submitting}

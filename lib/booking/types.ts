@@ -56,4 +56,6 @@ export type CreateBookingPayload = {
   propertyAddress: string;
   notes?: string;
   agentName?: string;
+  pricingTierLabel?: string;
+  price?: number;
 };

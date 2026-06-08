@@ -3,10 +3,12 @@
 import { format, parseISO } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { SLOT_LABELS, type BookingSlot } from "@/lib/booking/constants";
+import type { StandardPricingTier } from "@/lib/pricing/standard-inspections";
 
 type ConfirmStepProps = {
   date: string;
   slot: BookingSlot;
+  tier: StandardPricingTier;
   form: {
     customerName: string;
     customerEmail: string;
@@ -43,6 +45,7 @@ function SummaryField({
 export function ConfirmStep({
   date,
   slot,
+  tier,
   form,
   onConfirm,
   submitting,
@@ -63,7 +66,8 @@ export function ConfirmStep({
           {dateLabel}
         </p>
         <p className="mt-1 text-sm font-medium text-muted">
-          {SLOT_LABELS[slot]} slot
+          {SLOT_LABELS[slot]} slot · {tier.sizeLabel}
+          {tier.price != null ? ` · $${tier.price}` : ""}
         </p>
       </div>
 
@@ -83,7 +87,7 @@ export function ConfirmStep({
             <SummaryField
               label="Notes"
               value={form.notes}
-              className={form.agentName ? "sm:col-span-2" : "sm:col-span-2"}
+              className="sm:col-span-2"
             />
           )}
         </div>

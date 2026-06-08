@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { BUSINESS_NAME } from "./business";
-import { featuredSeoBodyText } from "./featured-locations";
 import {
   LOCATION_SLUG_PREFIX,
   LOCATIONS,
@@ -49,17 +48,17 @@ function excerptText(text: string, maxLen = 155): string {
 }
 
 export function getLocationMetaDescription(location: Location): string {
-  if (location.seoBodyParagraphs && location.seoBodyCta) {
+  if (location.metaDescription) {
+    return excerptText(location.metaDescription);
+  }
+  if (location.introParagraph) {
     return excerptText(
-      featuredSeoBodyText({
-        h1: location.h1,
-        h2: location.h2,
-        seoBodyParagraphs: location.seoBodyParagraphs,
-        seoBodyCta: location.seoBodyCta,
-      }),
+      `${location.introParagraph} Licensed Building Practitioner with 25+ years experience. Drone roof, moisture testing, thermal imaging and Spectora reports in ${location.name}.`,
     );
   }
-  return `${location.h2}. Book with ${BUSINESS_NAME} — drone roof inspections, moisture testing, thermal imaging and detailed Spectora reports.`;
+  return excerptText(
+    `${location.h2} Book with ${BUSINESS_NAME} — drone roof inspections, moisture testing, thermal imaging and detailed Spectora reports.`,
+  );
 }
 
 export function getLocationMetadata(location: Location): Metadata {

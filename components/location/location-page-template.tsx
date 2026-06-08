@@ -1,9 +1,9 @@
 import Link from "next/link";
+import { ScrollToBookingLink } from "@/components/home/scroll-to-booking-link";
 import { JsonLd } from "@/components/seo/json-ld";
 import { LocationPostcodesSeo } from "@/components/seo/location-postcodes-seo";
 import {
   BUSINESS_PHONE,
-  GOOGLE_BUSINESS_PROFILE_URL,
   SAMPLE_REPORT_PATH,
 } from "@/lib/seo/business";
 import {
@@ -44,18 +44,21 @@ const WHAT_WE_CHECK = [
   },
   {
     title: "Digital Spectora report",
-    body: "A premium digital report with photographs, moisture readings, and prioritised findings — shareable with your lawyer or lender.",
+    body: "A premium interactive report with photographs, moisture readings, and prioritised findings — shareable with your lawyer or lender.",
   },
 ];
 
 const WHY_MAINLAND = [
-  "Qualified licensed builder with 25+ years of building experience",
+  "Licensed Building Practitioner with 25+ years of building experience",
   "Fully insured professional inspection service",
   "Drone roof capability included where appropriate",
-  "Detailed Spectora digital reports — not basic PDF templates",
+  "Detailed Spectora interactive reports — not basic PDF templates",
   "Modern online booking with morning and afternoon slots",
   "Clear, direct communication before and after every inspection",
 ];
+
+const BOOKING_CTA_CLASS =
+  "inline-flex min-h-12 items-center justify-center rounded-lg bg-accent px-8 font-semibold text-white transition-colors hover:bg-accent-light";
 
 type LocationPageTemplateProps = {
   location: Location;
@@ -67,19 +70,19 @@ export function LocationPageTemplate({ location }: LocationPageTemplateProps) {
 
   const faqs = [
     {
-      q: `Do you offer pre-purchase inspections in ${location.name}?`,
+      q: `Do you offer pre-purchase building inspections in ${location.name}?`,
       a: `Yes. We provide comprehensive pre-purchase building inspections throughout ${location.name}, documenting roof condition, moisture risk, interior defects, and structural observations in a detailed Spectora report.`,
     },
     {
-      q: `Do you inspect roofs with a drone in ${location.name}?`,
+      q: `Can you inspect the roof with a drone?`,
       a: `Yes. Where safe and appropriate, drone roof inspection is included to capture roof areas that are difficult to assess from ground level — particularly useful for ${location.name} homes with complex roof lines or limited access.`,
     },
     {
-      q: `Do you check for moisture?`,
+      q: `Do you check moisture-prone areas?`,
       a: `Moisture testing is standard. We use moisture metres and thermal imaging to identify damp in bathrooms, kitchens, subfloors, and cladding systems — a critical step for Canterbury properties.`,
     },
     {
-      q: `How quickly do I receive the report?`,
+      q: `How quickly will I receive my report?`,
       a: `Reports are delivered digitally through Spectora, typically within 24 hours of the inspection. A same-day verbal overview can be arranged on request.`,
     },
     {
@@ -87,7 +90,7 @@ export function LocationPageTemplate({ location }: LocationPageTemplateProps) {
       a: `Yes. Choose a morning or afternoon slot through our online booking calendar. You will receive email confirmation once your inspection is secured.`,
     },
     {
-      q: `Do you service suburbs near ${location.name}?`,
+      q: `Do you service nearby suburbs?`,
       a: `Yes. We cover ${location.name} and surrounding areas across Christchurch and Canterbury. Nearby suburbs are listed below, and our full service area is available on the service areas page.`,
     },
     ...(location.postcodes.length > 0
@@ -99,6 +102,10 @@ export function LocationPageTemplate({ location }: LocationPageTemplateProps) {
         ]
       : []),
   ];
+
+  const introParagraph =
+    location.introParagraph ??
+    location.intro;
 
   return (
     <>
@@ -112,27 +119,17 @@ export function LocationPageTemplate({ location }: LocationPageTemplateProps) {
       <section className="border-b border-border bg-navy-deep text-white">
         <div className="mx-auto max-w-7xl px-5 py-16 lg:px-8 lg:py-24">
           <p className="text-sm font-semibold uppercase tracking-widest text-white/60">
-            Canterbury · Licensed builder · Spectora reports
+            Canterbury · Licensed Building Practitioner · Spectora reports
           </p>
           <h1 className="font-display mt-4 max-w-4xl text-4xl leading-tight sm:text-5xl lg:text-6xl">
-            <a
-              href={GOOGLE_BUSINESS_PROFILE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="transition-colors hover:text-white/90"
-            >
-              {location.h1}
-            </a>
+            {location.h1}
           </h1>
           <p className="mt-6 max-w-2xl text-lg text-white/80">{location.h2}</p>
           <LocationPostcodesSeo location={location} />
           <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-            <Link
-              href="/book"
-              className="inline-flex min-h-12 items-center justify-center rounded-lg bg-accent px-8 font-semibold text-white transition-colors hover:bg-accent-light"
-            >
-              Book inspection
-            </Link>
+            <ScrollToBookingLink className={BOOKING_CTA_CLASS}>
+              Check availability and pricing
+            </ScrollToBookingLink>
             <a
               href={phoneHref}
               className="inline-flex min-h-12 items-center justify-center rounded-lg border border-white/25 px-8 font-semibold text-white transition-colors hover:bg-white/10"
@@ -140,10 +137,10 @@ export function LocationPageTemplate({ location }: LocationPageTemplateProps) {
               Call {BUSINESS_PHONE}
             </a>
             <Link
-              href="/contact"
+              href="/pricing"
               className="inline-flex min-h-12 items-center justify-center rounded-lg border border-white/25 px-8 font-semibold text-white transition-colors hover:bg-white/10"
             >
-              Contact us
+              View pricing
             </Link>
           </div>
         </div>
@@ -151,76 +148,48 @@ export function LocationPageTemplate({ location }: LocationPageTemplateProps) {
 
       <section className="bg-background">
         <div className="mx-auto max-w-7xl px-5 py-16 lg:px-8 lg:py-20">
-          {location.seoBodyParagraphs && location.seoBodyCta ? (
-            <div className="grid gap-12 lg:grid-cols-[1fr_320px] lg:gap-16">
-              <div className="max-w-3xl">
-                <h2 className="font-display text-2xl text-navy sm:text-3xl">
-                  Professional building inspections in {location.name}
-                </h2>
-                <div className="mt-6 space-y-5 text-lg text-muted">
-                  {location.seoBodyParagraphs.map((paragraph) => (
-                    <p key={paragraph.slice(0, 48)}>{paragraph}</p>
-                  ))}
-                  <p>
-                    <Link
-                      href="/book"
-                      className="font-semibold text-accent transition-colors hover:text-accent-light"
-                    >
-                      {location.seoBodyCta}
-                    </Link>
-                  </p>
-                </div>
+          <div className="grid gap-12 lg:grid-cols-[1fr_320px] lg:gap-16">
+            <div className="max-w-3xl">
+              <h2 className="font-display text-2xl text-navy sm:text-3xl">
+                Building inspection services in {location.name}
+              </h2>
+              <div className="mt-6 space-y-5 text-lg text-muted">
+                <p>{introParagraph}</p>
+                {location.seoBodyParagraphs?.map((paragraph) => (
+                  <p key={paragraph.slice(0, 48)}>{paragraph}</p>
+                ))}
+                {!location.seoBodyParagraphs ? (
+                  <p>{location.trustContext}</p>
+                ) : null}
               </div>
-              <div className="rounded-2xl border border-border bg-surface p-8 lg:self-start">
-                <h3 className="font-display text-lg text-navy">
-                  What you receive
-                </h3>
-                <ul className="mt-6 space-y-3 text-sm text-muted">
-                  <li className="flex gap-3">
-                    <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent" />
-                    Licensed Building Practitioner (LBP) assessment
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent" />
-                    Drone roof, moisture meter, and thermal imaging on site
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent" />
-                    Spectora interactive reports with fast turnaround
-                  </li>
-                </ul>
+              <div className="mt-8">
+                <ScrollToBookingLink className={BOOKING_CTA_CLASS}>
+                  Check availability and pricing
+                </ScrollToBookingLink>
               </div>
             </div>
-          ) : (
-            <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
-              <div>
-                <h2 className="font-display text-2xl text-navy sm:text-3xl">
-                  Trusted building inspections in {location.name}
-                </h2>
-                <p className="mt-5 text-lg text-muted">{location.intro}</p>
-              </div>
-              <div className="rounded-2xl border border-border bg-surface p-8 lg:p-10">
-                <h2 className="font-display text-xl text-navy">
-                  Why {location.name} homeowners choose Mainland
-                </h2>
-                <p className="mt-4 text-muted">{location.trustContext}</p>
-                <ul className="mt-6 space-y-3 text-sm text-muted">
-                  <li className="flex gap-3">
-                    <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent" />
-                    Pre-purchase, pre-sale, and specialist inspections
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent" />
-                    Drone roof, moisture, and thermal imaging on site
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent" />
-                    Spectora digital reports delivered within 24 hours
-                  </li>
-                </ul>
-              </div>
+            <div className="rounded-2xl border border-border bg-surface p-8 lg:self-start">
+              <h3 className="font-display text-lg text-navy">What you receive</h3>
+              <ul className="mt-6 space-y-3 text-sm text-muted">
+                <li className="flex gap-3">
+                  <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent" />
+                  Licensed Building Practitioner (LBP) assessment
+                </li>
+                <li className="flex gap-3">
+                  <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent" />
+                  Drone roof, moisture meter, and thermal imaging on site
+                </li>
+                <li className="flex gap-3">
+                  <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent" />
+                  Spectora interactive reports with fast turnaround
+                </li>
+                <li className="flex gap-3">
+                  <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent" />
+                  25+ years of Canterbury building experience
+                </li>
+              </ul>
             </div>
-          )}
+          </div>
         </div>
       </section>
 
@@ -231,12 +200,13 @@ export function LocationPageTemplate({ location }: LocationPageTemplateProps) {
               Comprehensive scope
             </p>
             <h2 className="font-display mt-3 text-2xl text-navy sm:text-3xl">
-              What we check
+              What we check in {location.name}
             </h2>
             <p className="mt-4 text-muted">
               Every inspection in {location.name} follows a structured,
-              builder-led process — combining traditional expertise with modern
-              inspection technology.
+              builder-led process — combining traditional expertise with drone
+              roof photography, moisture testing, thermal imaging, and
+              interactive Spectora reports.
             </p>
           </div>
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -262,8 +232,9 @@ export function LocationPageTemplate({ location }: LocationPageTemplateProps) {
               </h2>
               <p className="mt-4 text-muted">
                 We are not a one-person checklist operation. Mainland is built
-                for buyers and vendors who want builder-qualified assessment,
-                modern tools, and reports that stand up to due diligence.
+                for buyers and vendors in {location.name} who want
+                builder-qualified assessment, modern tools, and reports that
+                stand up to due diligence.
               </p>
             </div>
             <ul className="space-y-4 rounded-2xl border border-border bg-surface p-8">
@@ -295,7 +266,7 @@ export function LocationPageTemplate({ location }: LocationPageTemplateProps) {
                     href={locationPath(area.slug)}
                     className="inline-flex rounded-full border border-border bg-background px-5 py-2.5 text-sm font-medium text-navy transition-colors hover:border-accent/40 hover:text-accent"
                   >
-                    {area.name}
+                    Building Inspections {area.name}
                   </Link>
                 </li>
               ))}
@@ -334,17 +305,15 @@ export function LocationPageTemplate({ location }: LocationPageTemplateProps) {
             Book a building inspection in {location.name}
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-white/75">
-            Secure a morning or afternoon slot online. Drone roof checks, moisture
-            testing, thermal imaging, and a detailed Spectora report — carried
-            out by a licensed builder with 25+ years experience.
+            Check availability and pricing for your {location.name} inspection.
+            Drone roof checks, moisture testing, thermal imaging, and a detailed
+            Spectora report — carried out by a Licensed Building Practitioner
+            with 25+ years experience.
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link
-              href="/book"
-              className="inline-flex min-h-12 items-center justify-center rounded-lg bg-accent px-8 font-semibold text-white transition-colors hover:bg-accent-light"
-            >
-              Book inspection
-            </Link>
+            <ScrollToBookingLink className={BOOKING_CTA_CLASS}>
+              Check availability and pricing
+            </ScrollToBookingLink>
             <a
               href={phoneHref}
               className="inline-flex min-h-12 items-center justify-center rounded-lg border border-white/25 px-8 font-semibold text-white transition-colors hover:bg-white/10"
