@@ -27,7 +27,7 @@ export default function LogoConceptsPage() {
             </h1>
             <p className="mt-2 max-w-xl text-sm text-muted">
               Premium directions for Mainland Building Inspections — led by the
-              Twin Peaks mark.
+              Mainland Mark (live in header).
             </p>
           </div>
           <Link

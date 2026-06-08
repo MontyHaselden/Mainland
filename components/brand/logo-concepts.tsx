@@ -5,6 +5,20 @@ type LogoProps = {
   style?: CSSProperties;
 };
 
+/** AI-rendered mark — artistic mountain with bold M (live site logo) */
+export function LogoMainlandMark({ className = "h-16 w-16", style }: LogoProps) {
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/logo/mainland-logo-mark.png"
+      alt=""
+      className={`object-contain ${className ?? ""}`}
+      style={style}
+      draggable={false}
+    />
+  );
+}
+
 /** Premium render — twin peak M (PNG, not SVG) */
 export function LogoTwinPeaks({ className = "h-16 w-16", style }: LogoProps) {
   return (
@@ -19,100 +33,75 @@ export function LogoTwinPeaks({ className = "h-16 w-16", style }: LogoProps) {
   );
 }
 
-/** Layered mountain backdrop with premium M */
+/** Layered mountain backdrop with premium M — scaled preview of LogoMark */
 export function LogoSummit({ className = "h-16 w-16", style }: LogoProps) {
   return (
     <svg viewBox="0 0 80 80" fill="none" className={className} style={style} aria-hidden>
       <defs>
-        <linearGradient
-          id="summitFaceLight"
-          x1="24"
-          y1="12"
-          x2="36"
-          y2="80"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop offset="0%" stopColor="#72dba0" />
-          <stop offset="55%" stopColor="#4aa876" />
-          <stop offset="100%" stopColor="#358a5c" />
+        <clipPath id="summitClip">
+          <rect width="80" height="80" rx="20" />
+        </clipPath>
+        <linearGradient id="summitSky" x1="40" y1="0" x2="40" y2="80" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#243044" />
+          <stop offset="100%" stopColor="#1a2332" />
         </linearGradient>
-        <linearGradient
-          id="summitFaceShadow"
-          x1="56"
-          y1="12"
-          x2="44"
-          y2="80"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop offset="0%" stopColor="#3f8f5f" />
-          <stop offset="55%" stopColor="#2d6a4f" />
-          <stop offset="100%" stopColor="#1e4a36" />
-        </linearGradient>
-        <linearGradient
-          id="summitFoothill"
-          x1="40"
-          y1="64"
-          x2="40"
-          y2="80"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop offset="0%" stopColor="#2d6a4f" />
+        <linearGradient id="summitRidgeFar" x1="16" y1="36" x2="40" y2="80" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#2a5c42" />
           <stop offset="100%" stopColor="#1a3d2c" />
         </linearGradient>
-        <linearGradient
-          id="summitSnow"
-          x1="40"
-          y1="10"
-          x2="40"
-          y2="28"
-          gradientUnits="userSpaceOnUse"
-        >
+        <linearGradient id="summitFaceLight" x1="28" y1="16" x2="36" y2="80" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#7ee0a8" />
+          <stop offset="45%" stopColor="#52b87d" />
+          <stop offset="100%" stopColor="#3a9462" />
+        </linearGradient>
+        <linearGradient id="summitFaceShadow" x1="56" y1="16" x2="44" y2="80" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#3d9160" />
+          <stop offset="50%" stopColor="#2d6a4f" />
+          <stop offset="100%" stopColor="#1e4a36" />
+        </linearGradient>
+        <linearGradient id="summitSnow" x1="40" y1="12" x2="40" y2="32" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="#ffffff" />
-          <stop offset="100%" stopColor="#d8ecf5" />
+          <stop offset="100%" stopColor="#c5e4f0" />
+        </linearGradient>
+        <linearGradient id="summitMShadow" x1="40" y1="24" x2="40" y2="72" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#0f2419" stopOpacity="0" />
+          <stop offset="100%" stopColor="#0f2419" stopOpacity="0.45" />
         </linearGradient>
       </defs>
-      <rect width="80" height="80" rx="18" fill="#1a2332" />
-      <path
-        d="M0 80C8 73 14 70 20 73C25 75.6 28 77 32 76C36 75 40 74.4 44 76C48 77.6 53 75.6 60 73C66 70 72 73 80 80V80H0Z"
-        fill="url(#summitFoothill)"
-        opacity="0.9"
-      />
-      <path
-        d="M6 80L23 55L31 37L37 22L40 11L40 80H6Z"
-        fill="url(#summitFaceLight)"
-      />
-      <path
-        d="M40 11L43 22L49 37L57 55L74 80H40V11Z"
-        fill="url(#summitFaceShadow)"
-      />
-      <path
-        d="M40 11L42 23L48 40L56 58L64 72L74 80"
-        stroke="#1a3d2c"
-        strokeWidth="1.2"
-        opacity="0.25"
-        fill="none"
-      />
-      <path
-        d="M31.6 25L36.4 17.6L40 11L43.6 17.6L48.4 25L44.8 28H35.2L31.6 25Z"
-        fill="url(#summitSnow)"
-      />
-      <path
-        d="M35.6 20.4L40 15.6L44.4 20.4L41.6 22.4H38.4L35.6 20.4Z"
-        fill="#ffffff"
-        opacity="0.85"
-      />
-      <path
-        d="M20.4 68.4V30.4H28.2L40 50.4L51.8 30.4H59.6V68.4H53V41.6L40 58.4L27 41.6V68.4H20.4Z"
-        fill="#fff"
-      />
-      <path
-        d="M20.4 68.4V30.4H28.2L40 50.4L51.8 30.4H59.6V68.4H53V41.6L40 58.4L27 41.6V68.4H20.4Z"
-        stroke="#ffffff"
-        strokeWidth="0.7"
-        strokeLinejoin="round"
-        opacity="0.35"
-        fill="none"
-      />
+      <rect width="80" height="80" rx="20" fill="url(#summitSky)" />
+      <g clipPath="url(#summitClip)">
+        <path
+          d="M0 80V68C12 60 20 56 28 60C34 63 38 64 40 63C42 62 46 61 52 60C60 58 68 62 80 68V80H0Z"
+          fill="#1a3d2c"
+          opacity="0.55"
+        />
+        <path d="M0 80L20 60L32 44L12 80H0Z" fill="url(#summitRidgeFar)" opacity="0.7" />
+        <path d="M80 80L60 56L48 40L68 80H80Z" fill="url(#summitRidgeFar)" opacity="0.55" />
+        <path d="M4 80L22 57L33 34L38 21L40 16L40 80H4Z" fill="url(#summitFaceLight)" />
+        <path d="M40 16L42 21L47 34L58 57L76 80H40V16Z" fill="url(#summitFaceShadow)" />
+        <path d="M40 16L46 34L58 57L76 80" stroke="#1a3d2c" strokeWidth="1" opacity="0.3" fill="none" />
+        <path d="M31 29L33 20L38 21" stroke="#ffffff" strokeWidth="0.8" opacity="0.12" fill="none" />
+        <path d="M8 80H72" stroke="#2d6a4f" strokeWidth="1.2" opacity="0.35" />
+        <path d="M31 29L36.4 20L40 15L43.6 20L49 29L45 32H35L31 29Z" fill="url(#summitSnow)" />
+        <path d="M35.6 23.6L40 18.4L44.4 23.6L41.2 25.6H38.8L35.6 23.6Z" fill="#ffffff" />
+        <path
+          d="M15.6 71.6V25.6H25.6L40 49.6L54.4 25.6H64.4V71.6H56.4V42.4L40 62.4L23.6 42.4V71.6H15.6Z"
+          fill="url(#summitMShadow)"
+          transform="translate(1.2 1.6)"
+        />
+        <path
+          d="M14.4 70.4V24.4H24.4L40 48.4L55.6 24.4H65.6V70.4H57.6V41.2L40 61.2L22.4 41.2V70.4H14.4Z"
+          fill="#fff"
+        />
+        <path
+          d="M14.4 70.4V24.4H24.4L40 48.4L55.6 24.4H65.6V70.4H57.6V41.2L40 61.2L22.4 41.2V70.4H14.4Z"
+          stroke="#ffffff"
+          strokeWidth="1"
+          strokeLinejoin="round"
+          opacity="0.25"
+          fill="none"
+        />
+      </g>
     </svg>
   );
 }
@@ -279,18 +268,29 @@ export function LogoPrecision({ className = "h-16 w-16", style }: LogoProps) {
 }
 
 export const LOGO_FEATURED = {
-  id: "twin-peaks",
-  name: "Twin Peaks",
-  tagline: "Double summit M with valley river",
+  id: "mainland-mark",
+  name: "Mainland Mark",
+  tagline: "Artistic alpine M — live site logo",
   description:
-    "The M is the mountain — snowy peaks at both apexes, lush green slopes, and a river running through the central valley. Premium, regional, unmistakably Mainland.",
-  Mark: LogoTwinPeaks,
-  renderSrc: "/logo/twin-peaks-render.png",
+    "AI-crafted rounded-square mark: layered Canterbury mountain fully inside the frame, snow cap, foothill pines, and a bold proud white M at centre.",
+  Mark: LogoMainlandMark,
+  renderSrc: "/logo/mainland-logo-mark.png",
   wordmark: true,
   wide: false,
 } as const;
 
 export const LOGO_CONCEPTS = [
+  {
+    id: "mainland-mark",
+    name: "Mainland Mark",
+    tagline: "Artistic alpine M — live site logo",
+    description:
+      "AI-crafted rounded-square mark: layered Canterbury mountain fully inside the frame, snow cap, foothill pines, and a bold proud white M at centre.",
+    Mark: LogoMainlandMark,
+    wordmark: true,
+    wide: false,
+    featured: true,
+  },
   {
     id: "twin-peaks",
     name: "Twin Peaks",
@@ -300,7 +300,6 @@ export const LOGO_CONCEPTS = [
     Mark: LogoTwinPeaks,
     wordmark: true,
     wide: false,
-    featured: true,
   },
   {
     id: "summit",
