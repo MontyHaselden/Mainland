@@ -22,6 +22,13 @@
       "when": 1749270000000,
       "tag": "0002_availability_blocks",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1749356400000,
+      "tag": "0003_contact_messages",
+      "breakpoints": true
     }
   ]
 }

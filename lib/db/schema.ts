@@ -66,3 +66,18 @@ export const availabilityBlocks = pgTable(
 
 export type AvailabilityBlock = typeof availabilityBlocks.$inferSelect;
 export type NewAvailabilityBlock = typeof availabilityBlocks.$inferInsert;
+
+export const contactMessages = pgTable("contact_messages", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  email: varchar("email", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  phone: varchar("phone", { length: 50 }),
+  address: text("address"),
+  acknowledgedAt: timestamp("acknowledged_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export type ContactMessage = typeof contactMessages.$inferSelect;
+export type NewContactMessage = typeof contactMessages.$inferInsert;

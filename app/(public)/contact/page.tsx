@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ContactForm } from "@/components/contact/contact-form";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -15,8 +16,14 @@ export default function ContactPage() {
       <h1 className="font-display text-4xl text-navy">Contact</h1>
       <p className="mt-4 text-lg text-muted">
         Ready to book? Use our online calendar for the fastest confirmation.
+        Otherwise send us a message below.
       </p>
-      <dl className="mt-10 space-y-6">
+
+      <div className="mt-10">
+        <ContactForm />
+      </div>
+
+      <dl className="mt-12 space-y-6 border-t border-border pt-10">
         <div>
           <dt className="text-sm font-semibold text-navy">Phone</dt>
           <dd className="mt-1">

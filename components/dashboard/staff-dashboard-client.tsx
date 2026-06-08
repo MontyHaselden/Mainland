@@ -1,18 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import type { Booking } from "@/lib/db/schema";
+import type { Booking, ContactMessage } from "@/lib/db/schema";
 import { NewBookingsPanel } from "./new-bookings-panel";
 import { TodayPanel } from "./today-panel";
 import { UpcomingPanel } from "./upcoming-panel";
 import { CrmTable } from "./crm-table";
 import { BookingDetailModal } from "./booking-detail-modal";
+import { ContactDetailModal } from "./contact-detail-modal";
+import { ContactMessagesPanel } from "./contact-messages-panel";
 
 type StaffDashboardClientProps = {
   newBookings: Booking[];
   today: Booking[];
   upcoming: Booking[];
   all: Booking[];
+  newContactMessages: ContactMessage[];
+  allContactMessages: ContactMessage[];
   dbError: boolean;
 };
 
@@ -21,9 +25,14 @@ export function StaffDashboardClient({
   today,
   upcoming,
   all,
+  newContactMessages,
+  allContactMessages,
   dbError,
 }: StaffDashboardClientProps) {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [selectedContact, setSelectedContact] = useState<ContactMessage | null>(
+    null,
+  );
 
   return (
     <>
@@ -37,10 +46,31 @@ export function StaffDashboardClient({
         <h1 className="font-display text-3xl text-navy">Dashboard</h1>
         {newBookings.length > 0 && (
           <span className="rounded-full bg-amber-500 px-3 py-1 text-xs font-bold text-white">
-            {newBookings.length} new
+            {newBookings.length} new booking{newBookings.length === 1 ? "" : "s"}
+          </span>
+        )}
+        {newContactMessages.length > 0 && (
+          <span className="rounded-full bg-accent px-3 py-1 text-xs font-bold text-white">
+            {newContactMessages.length} new message
+            {newContactMessages.length === 1 ? "" : "s"}
           </span>
         )}
       </div>
+
+      <section className="mb-10 rounded-2xl border border-border bg-surface p-6">
+        <h2 className="text-lg font-semibold text-navy">Contact messages</h2>
+        <p className="mt-1 text-sm text-muted">
+          Enquiries from the website contact form. Respond by email, then mark as
+          handled.
+        </p>
+        <div className="mt-6">
+          <ContactMessagesPanel
+            messages={newContactMessages}
+            onSelectMessage={setSelectedContact}
+            showAcknowledge
+          />
+        </div>
+      </section>
 
       <div className="grid gap-10 lg:grid-cols-2">
         <section className="rounded-2xl border border-border bg-surface p-6">
@@ -83,6 +113,16 @@ export function StaffDashboardClient({
       </section>
 
       <section className="mt-10 rounded-2xl border border-border bg-surface p-6">
+        <h2 className="text-lg font-semibold text-navy">All contact messages</h2>
+        <div className="mt-6">
+          <ContactMessagesPanel
+            messages={allContactMessages}
+            onSelectMessage={setSelectedContact}
+          />
+        </div>
+      </section>
+
+      <section className="mt-10 rounded-2xl border border-border bg-surface p-6">
         <h2 className="text-lg font-semibold text-navy">All bookings</h2>
         <div className="mt-6">
           <CrmTable
@@ -95,6 +135,10 @@ export function StaffDashboardClient({
       <BookingDetailModal
         booking={selectedBooking}
         onClose={() => setSelectedBooking(null)}
+      />
+      <ContactDetailModal
+        message={selectedContact}
+        onClose={() => setSelectedContact(null)}
       />
     </>
   );

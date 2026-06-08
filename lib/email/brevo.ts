@@ -1,6 +1,6 @@
 import { format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
-import type { Booking } from "@/lib/db/schema";
+import type { Booking, ContactMessage } from "@/lib/db/schema";
 import { NZ_TIMEZONE, SLOT_LABELS, type BookingSlot } from "@/lib/booking/constants";
 
 type SendResult = { ok: true } | { ok: false; error: string };
@@ -108,6 +108,45 @@ export async function sendStaffNewBookingAlert(
   return sendBrevoEmail({
     to: [{ email: notifyEmail, name: "Mainland Staff" }],
     subject: `New booking — ${booking.customerName} — ${booking.inspectionDate}`,
+    htmlContent: html,
+  });
+}
+
+function contactDetailsHtml(message: ContactMessage): string {
+  return `
+    <p><strong>Email:</strong> ${message.email}</p>
+    ${message.phone ? `<p><strong>Phone:</strong> ${message.phone}</p>` : ""}
+    ${message.address ? `<p><strong>Address:</strong> ${message.address}</p>` : ""}
+    <p><strong>Message:</strong></p>
+    <p style="white-space: pre-wrap;">${message.message}</p>
+  `;
+}
+
+export async function sendStaffContactAlert(
+  message: ContactMessage,
+): Promise<SendResult> {
+  const notifyEmail =
+    process.env.BUSINESS_NOTIFICATION_EMAIL ?? process.env.STAFF_EMAIL;
+  if (!notifyEmail) {
+    return { ok: false, error: "No business notification email configured" };
+  }
+
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const dashboardUrl = `${siteUrl}/staff`;
+
+  const html = `
+    <div style="font-family: system-ui, sans-serif; color: #1a2332; max-width: 560px;">
+      <h1 style="font-size: 22px;">New contact form message</h1>
+      <p>A new enquiry was submitted on the website.</p>
+      ${contactDetailsHtml(message)}
+      <p><a href="${dashboardUrl}" style="display:inline-block;padding:12px 20px;background:#2d6a4f;color:#fff;text-decoration:none;border-radius:6px;">Open dashboard</a></p>
+    </div>
+  `;
+
+  return sendBrevoEmail({
+    to: [{ email: notifyEmail, name: "Mainland Staff" }],
+    subject: `Contact form — ${message.email}`,
     htmlContent: html,
   });
 }
